@@ -6,3 +6,4 @@ body:
   - type: markdown
     attributes:
       label: Description
+      placeholder: Task description here.
