@@ -1,0 +1,7 @@
+﻿services:
+  todobackend:
+    image: todobackend
+    build:
+      context: .
+      dockerfile: ToDoBackend/Dockerfile
+
