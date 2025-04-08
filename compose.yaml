@@ -12,3 +12,9 @@
       context: .
       dockerfile: TaskMicroservice/Dockerfile
 
+
+  usermicroservice:
+    image: usermicroservice
+    build:
+      context: .
+      dockerfile: UserMicroservice/Dockerfile
