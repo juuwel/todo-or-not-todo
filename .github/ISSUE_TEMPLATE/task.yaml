@@ -1,7 +1,7 @@
 name: Task
 description: Used to define a task.
 title: "[TASK]: "
-labels: task # Automatically assign the 'task' label
+labels: ["task"]
 body:
   - type: markdown
     attributes:
