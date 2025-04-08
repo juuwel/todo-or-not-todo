@@ -1,7 +1,7 @@
 ---
 name: Epic
 about: Used to define an EPIC.
-title: "[EPIC] Title"
+title: "[EPIC]: Title"
 labels: enhancement
 assignees: ''
 
