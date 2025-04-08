@@ -3,7 +3,8 @@ description: Used to define a task.
 title: "[TASK]: "
 labels: ["task"]
 body:
-  - type: markdown
+  - type: textarea
+    id: task-description
     attributes:
       label: Description
       placeholder: Task description here.
