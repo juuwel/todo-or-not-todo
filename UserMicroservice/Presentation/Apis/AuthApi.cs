@@ -1,10 +1,10 @@
-﻿namespace ToDoBackend.Presentation.Apis;
+﻿namespace UserMicroservice.Presentation.Apis;
 
-public static class ToDoApi
+public static class AuthApi
 {
     public static RouteGroupBuilder AddTaskApi(this IEndpointRouteBuilder app)
     {
-        var api = app.MapGroup("/api/v1/tasks");
+        var api = app.MapGroup("/api/v1/auth");
 
         /*api.MapGet("/{subscriptionType}", GetSubscribers)
             .WithName("Get all subscribers for a subscription type");*/
