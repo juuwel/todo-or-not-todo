@@ -2,3 +2,6 @@
 **/.idea
 **/bin
 **/obj
+
+**/docs/.structurizr
+**/docs/workspace.json

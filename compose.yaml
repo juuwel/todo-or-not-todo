@@ -1,7 +1,14 @@
 ﻿services:
-  todobackend:
-    image: todobackend
+  structurizr:
+    image: structurizr/lite
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./docs:/usr/local/structurizr
+  
+  task-ms:
+    image: task-ms
     build:
       context: .
-      dockerfile: ToDoBackend/Dockerfile
+      dockerfile: TaskMicroservice/Dockerfile
 
