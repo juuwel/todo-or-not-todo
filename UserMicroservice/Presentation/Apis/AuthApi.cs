@@ -1,46 +1,85 @@
-﻿namespace UserMicroservice.Presentation.Apis;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Mvc;
+using Shared.Responses;
+using UserMicroservice.Application.Interfaces;
+using UserMicroservice.Domain.Entities;
+
+namespace UserMicroservice.Presentation.Apis;
 
 public static class AuthApi
 {
-    public static RouteGroupBuilder AddTaskApi(this IEndpointRouteBuilder app)
+    public static RouteGroupBuilder AddAuthApi(this IEndpointRouteBuilder app)
     {
-        var api = app.MapGroup("/api/v1/auth");
+        var api = app.MapGroup("/Auth");
 
-        /*api.MapGet("/{subscriptionType}", GetSubscribers)
-            .WithName("Get all subscribers for a subscription type");*/
+        api.MapPost("/Login", Login)
+            .WithName("Login")
+            .AllowAnonymous();
+
+        api.MapPost("/Register", Register)
+            .WithName("Register")
+            .AllowAnonymous();
 
         return api;
     }
-    
-    /*private static async Task<Results<Ok<GetSubscriptionDto>, ProblemHttpResult>> CreateSubscription(
-        [FromBody] CreateSubscriptionDto request, [FromServices] ISubscriberService subscriberService,
-        CancellationToken cancellationToken)
+
+    public static async Task<Results<Ok<AuthResponse>, ProblemHttpResult>> Login(
+        UserManager<ApplicationUser> userManager,
+        IJwtService jwtService,
+        [FromBody] LoginRequest request)
     {
-        try
+        if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
         {
-            var result = await subscriberService.SubscribeAsync(request);
-            var dto = new GetSubscriptionDto
+            return TypedResults.Problem(new ProblemDetails()
             {
-                Id = result.Id,
-                Email = result.Subscriber!.Email,
-                SubscriptionType = result.SubscriptionType!.Type
-            };
-            return TypedResults.Ok(dto);
+                Detail = "Wrong username or password",
+                Status = StatusCodes.Status400BadRequest,
+                Title = "WrongUserNameOrPassword"
+            });
         }
-        catch (NotFoundException e)
+
+        var user = await userManager.FindByEmailAsync(request.Email);
+        if (user == null)
         {
-            Log.Error("Subscription type not found: {SubscriptionType}", request.SubscriptionType);
-            return TypedResults.Problem(e.Message, statusCode: StatusCodes.Status404NotFound);
+            return TypedResults.Problem(new ProblemDetails()
+            {
+                Detail = "Wrong username or password",
+                Status = StatusCodes.Status400BadRequest,
+                Title = "WrongUserNameOrPassword"
+            });
         }
-        catch (BadRequestException e)
+
+        var result = await userManager.CheckPasswordAsync(user, request.Password);
+        if (!result)
         {
-            Log.Error("Bad request: {Error}", e.Message);
-            return TypedResults.Problem(e.Message, statusCode: StatusCodes.Status400BadRequest);
-        } 
-        catch (Exception e)
-        {
-            Log.Error("An error occurred while creating subscription: {Error}", e.Message);
-            return TypedResults.Problem(e.Message, statusCode: StatusCodes.Status500InternalServerError);
+            return TypedResults.Problem(new ProblemDetails()
+            {
+                Detail = "Wrong username or password",
+                Status = StatusCodes.Status400BadRequest,
+                Title = "WrongUserNameOrPassword"
+            });
         }
-    }*/
+
+        var roles = await userManager.GetRolesAsync(user);
+        var token = jwtService.GenerateJwtToken(user, roles, null);
+
+        return TypedResults.Ok(new AuthResponse()
+        {
+            Email = user.Email!,
+            UserId = user.Id,
+            Token = token
+        });
+    }
+
+    public static async Task<Results<Ok, ProblemHttpResult>> Register(
+        UserManager<ApplicationUser> userManager,
+        [FromBody] RegisterRequest request)
+    {
+        throw new NotImplementedException();
+
+
+        return TypedResults.Ok();
+    }
 }

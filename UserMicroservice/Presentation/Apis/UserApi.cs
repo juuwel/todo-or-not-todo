@@ -2,7 +2,7 @@
 
 public static class UserApi
 {
-    public static RouteGroupBuilder AddTaskApi(this IEndpointRouteBuilder app)
+    public static RouteGroupBuilder AddUserApi(this IEndpointRouteBuilder app)
     {
         var api = app.MapGroup("/api/v1/user");
 
