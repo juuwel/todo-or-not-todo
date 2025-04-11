@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import {TaskService} from '../../services/task.service';
 
 @Component({
   selector: 'app-home-page',
@@ -7,16 +8,11 @@ import { Component } from '@angular/core';
   styles: ``
 })
 export class HomePageComponent {
+  public tasks: string[] = [];
 
-  protected readonly tasks = [
-    "Do the dishes",
-    "Buy groceries",
-    "Clean up",
-    "Feed the dog",
-    "Laundry",
-    "Go to gym",
-    "Homework"
-  ];
+  constructor(public taskService: TaskService) {
+    this.tasks = this.taskService.getTasks();
+  }
 
   protected getRandomColor(): string {
     const randomColor = Math.floor(Math.random() * 16777215).toString(16);

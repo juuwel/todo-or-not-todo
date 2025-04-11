@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {RouterLink} from '@angular/router';
-import { AppConstants } from '../appConstants';
+import { AppConstants } from '../../appConstants';
 
 @Component({
   selector: 'navbar',
