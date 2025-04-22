@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Responses;
+using Unleash;
 using UserMicroservice.Application.Services.Interfaces;
 using UserMicroservice.Domain.Entities;
 
@@ -34,13 +35,13 @@ public static class AuthApi
         return TypedResults.Ok(authResponse);
     }
 
-    public static async Task<Results<Ok, ProblemHttpResult>> Register(
-        UserManager<ApplicationUser> userManager,
+    public static async Task<Results<Ok<AuthResponse>, ProblemHttpResult>> Register(
+        IUserService userService, IUnleash unleash,
         [FromBody] RegisterRequest request)
     {
+        if (unleash.IsEnabled("allow-register"))
+            return TypedResults.Ok(await userService.Register(request));
+
         throw new NotImplementedException();
-
-
-        return TypedResults.Ok();
     }
 }

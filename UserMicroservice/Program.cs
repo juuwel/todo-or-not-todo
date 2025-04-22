@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Unleash;
+using Unleash.ClientFactory;
 using UserMicroservice.Application.Services;
 using UserMicroservice.Application.Services.Interfaces;
 using UserMicroservice.Core.Configuration;
@@ -56,6 +58,20 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddSingleton<IUnleash>(serviceProvider =>
+{
+    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+    var settings = new UnleashSettings
+    {
+        AppName = "UserMicroservice",
+        UnleashApi = new Uri(configuration["Unleash:ApiUrl"]!),
+        CustomHttpHeaders = new Dictionary<string, string>
+        {
+            { "Authorization", configuration["Unleash:ApiToken"]! }
+        },
+    };
+    return new UnleashClientFactory().CreateClient(settings, synchronousInitialization: true);
+});
 
 var app = builder.Build();
 
