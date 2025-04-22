@@ -27,14 +27,14 @@ public class ToDoService(IToDoItemRepository toDoItemRepository) : IToDoService
         await toDoItemRepository.UpdateToDoItemAsync(toDoItem);
     }
 
-    public async Task UpdateToDoItemStatusAsync(Guid toDoItemId, bool isCompleted)
+    public async Task UpdateToDoItemStatusAsync(Guid toDoItemId)
     {
         var existingToDoItem = await toDoItemRepository.GetToDoItemByIdAsync(toDoItemId);
         if (existingToDoItem == null)
         {
             throw new Exception("ToDo item not found");
         }
-        await toDoItemRepository.UpdateToDoItemStatusAsync(toDoItemId, isCompleted);
+        await toDoItemRepository.UpdateToDoItemStatusAsync(toDoItemId);
     }
 
     public async Task DeleteToDoItemAsync(Guid toDoItemId)

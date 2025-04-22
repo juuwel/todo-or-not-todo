@@ -8,7 +8,7 @@ public interface IToDoItemRepository
     
     Task UpdateToDoItemAsync(ToDoItem toDoItem);
     
-    Task UpdateToDoItemStatusAsync(Guid toDoItemId, bool isCompleted);
+    Task UpdateToDoItemStatusAsync(Guid toDoItemId);
     
     Task DeleteToDoItemAsync(Guid toDoItemId);
     
