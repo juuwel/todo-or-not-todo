@@ -1,0 +1,42 @@
+name: Build and Deploy Docker Services
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          
+      - name: Add remote server to known_hosts
+        run: |
+          ssh-keyscan ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+          
+      - name: Deploy to server
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'ENDSSH'
+            # Check if todo-or-not-todo directory exists, if not clone it
+            if [ ! -d ~/todo-or-not-todo ]; then
+              echo "Directory not found. Cloning repository..."
+              git clone ${{ github.server_url }}/${{ github.repository }}.git ~/todo-or-not-todo
+            fi
+
+            # Navigate to project directory
+            cd ~/todo-or-not-todo
+
+            # Pull latest code
+            git pull
+          
+            # Start all services
+            docker compose up -d
+
+          ENDSSH
+
+
