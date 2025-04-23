@@ -22,7 +22,7 @@
       - POSTGRES_USER=ToDoOrNotToDo
       - POSTGRES_DB=ToDoOrNotToDo
     ports:
-      - "5434:5432"
+      - "5432:5432"
     volumes:
       - postgres-user-data:/var/lib/postgresql/data
     healthcheck:
