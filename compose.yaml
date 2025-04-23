@@ -1,45 +1,64 @@
 ﻿services:
-  structurizr:
-    image: structurizr/lite
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./docs:/usr/local/structurizr
-  
-  postgres:
+  postgres-task:
     image: postgres:16
     environment:
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=taskpass
+      - POSTGRES_USER=taskuser
+      - POSTGRES_DB=todoapp
     ports:
-      - "5432:5432"
+      - "5433:5432" # Different host port to avoid conflict
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-task-data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: ["CMD-SHELL", "pg_isready -U taskuser"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-user:
+    image: postgres:16
+    environment:
+      - POSTGRES_PASSWORD=userpass
+      - POSTGRES_USER=useruser
+      - POSTGRES_DB=userdb
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-user-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U useruser"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   task-ms:
     image: task-ms
-    ports:
-      - "8081:8080"
     build:
       context: .
       dockerfile: TaskMicroservice/Dockerfile
+    ports:
+      - "8081:8080"
     depends_on:
-      postgres:
+      postgres-task:
         condition: service_healthy
     environment:
-      - POSTGRES_CONNECTION_STRING=Host=postgres;Database=todoapp;Username=postgres;Password=postgres
-    
+      - POSTGRES_CONNECTION_STRING=Host=postgres-task;Database=todoapp;Username=taskuser;Password=taskpass
+
   usermicroservice:
     image: usermicroservice
     build:
       context: .
       dockerfile: UserMicroservice/Dockerfile
-  
+    depends_on:
+      postgres-user:
+        condition: service_healthy
+      unleash:
+        condition: service_started
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres-user;Database=userdb;Username=useruser;Password=userpass
+      - Unleash__ApiUrl=http://unleash:4242/api/
+      - Unleash__ApiToken=default:development.unleash-insecure-api-token
+
 volumes:
-  postgres-data:
-    
+  postgres-task-data:
+  postgres-user-data:
