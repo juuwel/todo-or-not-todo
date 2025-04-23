@@ -11,7 +11,11 @@
     build:
       context: .
       dockerfile: TaskMicroservice/Dockerfile
-
+    ports:
+      - "1000:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=taskdb;Username=root;Password=password
+      - ASPNETCORE_ENVIRONMENT=development
 
   user-ms:
     image: user-ms
@@ -24,7 +28,14 @@
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=userdb;Username=root;Password=password
       - Unleash__ApiUrl=http://unleash:4242/api/
-      - Unleash__ApiToken=default:development.unleash-insecure-api-token
+      - Unleash__ApiToken=default:development.3ffca58933e8662ec78c716e93a26d796f491cbf95175a7f2cd6d0f2
+      - ASPNETCORE_ENVIRONMENT=development
+      - Jwt__Key=ToDoOrNotToDo
+      - Jwt__Issuer=https://to-do-or-not.todo
+      - Jwt__Audience=to-do-or-not.todo
+      - Jwt__ExpirationMinutes=1440
+    ports:
+      - "1001:8080"
   
   postgres:
     image: postgres:latest

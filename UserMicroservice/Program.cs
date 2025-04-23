@@ -100,5 +100,6 @@ app.UseAuthorization();
 // Register APIs
 app.AddAuthApi();
 app.AddUserApi();
+app.AddFeatureFlagApi();
 
 app.Run();

@@ -1,3 +1,4 @@
+using ToDoBackend.Infrastructure;
 using ToDoBackend.Presentation.Apis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+// Apply any pending migrations on startup
+/*using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ToDoItemDbContext>();
+    dbContext.Database.Migrate();
+}*/
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

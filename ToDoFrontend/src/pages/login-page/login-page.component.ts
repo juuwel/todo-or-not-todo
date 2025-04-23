@@ -13,7 +13,7 @@ import {AuthService} from '../../services/auth.service';
 export class LoginPageComponent {
   protected isRegistering = false;
   protected loginForm: FormGroup;
-  protected errorMessage = '';
+  protected messageForUser = '';
 
   constructor(private fb: FormBuilder, public authService: AuthService) {
     this.loginForm = this.fb.group({
@@ -44,16 +44,20 @@ export class LoginPageComponent {
     const success = await this.authService.logIn(email, password);
 
     if (success) {
-      // TODO navigate to home
       return;
     }
 
-    this.errorMessage = "Incorrect email or password";
+    this.messageForUser = "Incorrect email or password";
   }
 
   private async register() {
     const email = this.loginForm.controls['email'].value;
     const password = this.loginForm.controls['password'].value;
-    this.authService.register(email, password);
+    const success = await this.authService.register(email, password);
+
+    if (success) {
+      this.messageForUser = "Registration successful! You can now log in.";
+      this.isRegistering = false; // Switch back to login mode
+    }
   }
 }
