@@ -28,7 +28,7 @@ public class ToDoItemRepository(ToDoItemDbContext context) : IToDoItemRepository
         var existingToDoItem = await context.ToDoItems.FindAsync(toDoItemId);
         if (existingToDoItem != null)
         {
-            existingToDoItem.CompletedAt = DateTime.Now;
+            existingToDoItem.CompletedAt = DateTime.UtcNow;
             await context.SaveChangesAsync();
         }
     }
