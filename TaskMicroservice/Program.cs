@@ -6,7 +6,6 @@ using ToDoBackend.Infrastructure.Repositories.Implementation;
 using ToDoBackend.Infrastructure.Repositories.Interfaces;
 using ToDoBackend.Presentation.Apis;
 
-using ServiceDefaults;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,8 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ToDoItemDbContext>(options =>
 {
-    var connectionString = EnvironmentHelper.GetValue("POSTGRES_CONNECTION_STRING", builder.Configuration, "ConnectionStrings:DefaultConnection");
-    options.UseNpgsql(connectionString);
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 builder.Services.AddControllers();
