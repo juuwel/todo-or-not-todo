@@ -1,9 +1,9 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Shared;
 using Unleash;
 using Unleash.ClientFactory;
 using UserMicroservice.Application.Handlers;
@@ -78,6 +78,8 @@ builder.Services.AddSingleton<IUnleash>(serviceProvider =>
     return new UnleashClientFactory().CreateClient(settings, synchronousInitialization: true);
 });
 
+builder.Services.AddCorsPolicy(builder.Configuration);
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -100,6 +102,8 @@ app.UseHttpsRedirection();
 app.UseExceptionHandler();
 
 app.UseStatusCodePages();
+
+app.UseCors(CorsPolicyExtension.CorsPolicyName);
 
 app.UseAuthentication();
 app.UseAuthorization();
