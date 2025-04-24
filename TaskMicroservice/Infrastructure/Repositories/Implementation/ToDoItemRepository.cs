@@ -19,17 +19,23 @@ public class ToDoItemRepository(ToDoItemDbContext context) : IToDoItemRepository
         {
             existingToDoItem.Title = toDoItem.Title;
             existingToDoItem.Description = toDoItem.Description;
-            existingToDoItem.IsCompleted = toDoItem.IsCompleted;
             await context.SaveChangesAsync();
         }
     }
 
-    public async Task UpdateToDoItemStatusAsync(Guid toDoItemId, bool isCompleted)
+    public async Task ToggleToDoItemStatusAsync(Guid toDoItemId)
     {
         var existingToDoItem = await context.ToDoItems.FindAsync(toDoItemId);
         if (existingToDoItem != null)
         {
-            existingToDoItem.IsCompleted = isCompleted;
+            if (existingToDoItem.CompletedAt == null)
+            {
+                existingToDoItem.CompletedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                existingToDoItem.CompletedAt = null;
+            }
             await context.SaveChangesAsync();
         }
     }

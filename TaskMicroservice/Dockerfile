@@ -7,17 +7,17 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["ToDoBackend/ToDoBackend.csproj", "ToDoBackend/"]
-RUN dotnet restore "ToDoBackend/ToDoBackend.csproj"
+COPY ["TaskMicroservice/TaskMicroservice.csproj", "TaskMicroservice/"]
+RUN dotnet restore "TaskMicroservice/TaskMicroservice.csproj"
 COPY . .
-WORKDIR "/src/ToDoBackend"
-RUN dotnet build "./ToDoBackend.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/TaskMicroservice"
+RUN dotnet build "TaskMicroservice.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./ToDoBackend.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "TaskMicroservice.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "ToDoBackend.dll"]
+ENTRYPOINT ["dotnet", "TaskMicroservice.dll"]
