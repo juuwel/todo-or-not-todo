@@ -34,7 +34,7 @@ public class ToDoService(IToDoItemRepository toDoItemRepository) : IToDoService
         {
             throw new Exception("ToDo item not found");
         }
-        await toDoItemRepository.UpdateToDoItemStatusAsync(toDoItemId);
+        await toDoItemRepository.ToggleToDoItemStatusAsync(toDoItemId);
     }
 
     public async Task DeleteToDoItemAsync(Guid toDoItemId)

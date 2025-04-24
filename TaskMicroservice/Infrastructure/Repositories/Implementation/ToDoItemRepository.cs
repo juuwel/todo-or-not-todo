@@ -23,12 +23,19 @@ public class ToDoItemRepository(ToDoItemDbContext context) : IToDoItemRepository
         }
     }
 
-    public async Task UpdateToDoItemStatusAsync(Guid toDoItemId)
+    public async Task ToggleToDoItemStatusAsync(Guid toDoItemId)
     {
         var existingToDoItem = await context.ToDoItems.FindAsync(toDoItemId);
         if (existingToDoItem != null)
         {
-            existingToDoItem.CompletedAt = DateTime.UtcNow;
+            if (existingToDoItem.CompletedAt == null)
+            {
+                existingToDoItem.CompletedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                existingToDoItem.CompletedAt = null;
+            }
             await context.SaveChangesAsync();
         }
     }
