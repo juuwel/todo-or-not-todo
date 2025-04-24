@@ -1,9 +1,10 @@
 ﻿import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {tap} from 'rxjs';
+import {BehaviorSubject, tap} from 'rxjs';
 import {Router} from '@angular/router';
 import {AuthResponse, ProblemDetails} from '../datamodel/api-respones';
 import {AppConstants} from '../appConstants';
+import {AuthStore} from './auth.store';
 
 @Injectable({
   providedIn: 'root'
@@ -16,11 +17,13 @@ export class AuthService {
   constructor(
     private httpClient: HttpClient,
     private router: Router,
+    private authStore: AuthStore,
   ) {
   }
 
   public authenticationCallback(token: string) {
     localStorage.setItem('token', token);
+    this.authStore.isLoggedIn = true;
     this.router.navigate([AppConstants.Routes.HOME]);
   }
 
@@ -46,6 +49,7 @@ export class AuthService {
   public logOut() {
     localStorage.removeItem('token');
     this.router.navigate(['/login']);
+    this.authStore.isLoggedIn = false;
   }
 
   public async register(username: string, password: string): Promise<ProblemDetails | null> {
@@ -71,10 +75,6 @@ export class AuthService {
         }
       });
     });
-  }
-
-  public isUserLoggedIn(): boolean {
-    return localStorage.getItem('token') === null;
   }
 
   public checkFeatureFlag(featureFlag: string) {

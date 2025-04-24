@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {AuthService} from '../../services/auth.service';
 import {AppMessageStore} from '../../services/app-message.store';
 import {AppConstants} from '../../appConstants';
-import {BehaviorSubject} from 'rxjs';
+import {firstValueFrom} from 'rxjs';
 import {AsyncPipe} from '@angular/common';
+import {AuthStore} from '../../services/auth.store';
 
 @Component({
   selector: 'app-login-page',
@@ -19,21 +20,25 @@ export class LoginPageComponent {
   protected isRegistering = false;
   protected loginForm: FormGroup;
 
-  protected isRegisteringEnabled$ = new BehaviorSubject<boolean>(false);
-
-  constructor(private fb: FormBuilder, public authService: AuthService, private appMessageStore: AppMessageStore) {
+  constructor(
+    private fb: FormBuilder,
+    public authService: AuthService,
+    private appMessageStore: AppMessageStore,
+    public authStore: AuthStore
+  ) {
     this.loginForm = this.fb.group({
       email: ['bob@app.com', [Validators.required, Validators.email]],
       password: ['P@ssw0rd', Validators.required]
     });
 
     this.authService.checkFeatureFlag(AppConstants.FeatureFlags.Register).subscribe(value => {
-      this.isRegisteringEnabled$.next(value);
+      this.authStore.isRegisteringEnabled = value;
     });
   }
 
-  public toggleRegistering() {
-    if (!this.isRegisteringEnabled$.getValue()) {
+  public async toggleRegistering() {
+    const isRegisteringEnabled = await firstValueFrom(this.authStore.isRegisteringEnabled$);
+    if (!isRegisteringEnabled) {
       return;
     }
 

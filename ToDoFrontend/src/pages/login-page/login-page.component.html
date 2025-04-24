@@ -35,10 +35,10 @@
     }
 
     <button class="p-2 rounded-md bg-green-500 disabled:opacity-25" [disabled]="loginForm.invalid">
-      {{ (isRegisteringEnabled$ | async) && isRegistering ? 'Sign up' : 'Log in' }}
+      {{ (authStore.isRegisteringEnabled$ | async) && isRegistering ? 'Sign up' : 'Log in' }}
     </button>
 
-    @if (isRegisteringEnabled$ | async) {
+    @if (authStore.isRegisteringEnabled$ | async) {
       @if (!isRegistering) {
         <div>
           <span>Log in to your account or&nbsp;</span>
