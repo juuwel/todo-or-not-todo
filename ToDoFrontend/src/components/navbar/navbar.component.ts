@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import { AppConstants } from '../../appConstants';
+import {AuthService} from '../../services/auth.service';
 
 @Component({
   selector: 'navbar',
@@ -10,4 +11,7 @@ import { AppConstants } from '../../appConstants';
 export class NavbarComponent {
   protected readonly LogInRoute = AppConstants.Routes.LOGIN;
   protected readonly HomeRoute = AppConstants.Routes.HOME;
+
+  constructor(public authService: AuthService) {
+  }
 }

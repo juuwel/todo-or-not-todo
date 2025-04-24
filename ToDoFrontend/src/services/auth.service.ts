@@ -1,14 +1,9 @@
 ﻿import {Injectable} from '@angular/core';
-import {HttpClient, HttpResponse} from '@angular/common/http';
-import {Observable, tap} from 'rxjs';
+import {HttpClient} from '@angular/common/http';
+import {tap} from 'rxjs';
 import {Router} from '@angular/router';
-import {resolve} from '@angular/compiler-cli';
-
-interface AuthResponse {
-  userId: string;
-  email: string;
-  token: string;
-}
+import {AuthResponse, ProblemDetails} from '../datamodel/api-respones';
+import {AppConstants} from '../appConstants';
 
 @Injectable({
   providedIn: 'root'
@@ -22,15 +17,19 @@ export class AuthService {
   ) {
   }
 
+  public authenticationCallback(token: string) {
+    localStorage.setItem('token', token);
+    this.router.navigate([AppConstants.Routes.HOME]);
+  }
+
   public async logIn(username: string, password: string): Promise<boolean> {
     return new Promise((resolve) => {
       this.httpClient.post<AuthResponse>(`${this.baseUrl}/login`, {
         Email: username,
         Password: password,
       }).pipe(
-        tap((res: AuthResponse) => {
-          localStorage.setItem('token', res.token);
-          this.router.navigate(['/']);
+        tap(async (res: AuthResponse) => {
+          this.authenticationCallback(res.token);
           resolve(true); // Resolve true on success
         })
       ).subscribe({
@@ -47,21 +46,32 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
-  public async register(username: string, password: string): Promise<boolean> {
+  public async register(username: string, password: string): Promise<ProblemDetails | null> {
     return new Promise((resolve) => {
-      this.httpClient.post(`${this.baseUrl}/register`, {
+      this.httpClient.post<AuthResponse>(`${this.baseUrl}/register`, {
         Email: username,
         Password: password,
       }).pipe(
-        tap(() => {
-          resolve(true);
+        tap((res: AuthResponse) => {
+          this.authenticationCallback(res.token);
+          resolve(null);
         })
       ).subscribe({
         error: (err) => {
           console.log(err);
-          resolve(false);
+          const problemDetails = new ProblemDetails(
+            err.error.detail,
+            err.error.status,
+            err.error.title,
+            err.error.error
+          );
+          resolve(problemDetails);
         }
       });
     });
+  }
+
+  public isUserLoggedIn(): boolean {
+    return localStorage.getItem('token') === null;
   }
 }
