@@ -2,9 +2,10 @@
 import {HttpClient} from '@angular/common/http';
 import {BehaviorSubject, tap} from 'rxjs';
 import {Router} from '@angular/router';
-import {AuthResponse, ProblemDetails} from '../datamodel/api-respones';
+import {AuthResponse, ProblemDetails} from '../datamodel/api-response.types';
 import {AppConstants} from '../appConstants';
-import {AuthStore} from './auth.store';
+import {AuthStore} from '../stores/auth.store';
+import {uuid} from '../datamodel/task.types';
 
 @Injectable({
   providedIn: 'root'
@@ -21,9 +22,10 @@ export class AuthService {
   ) {
   }
 
-  public authenticationCallback(token: string) {
+  public authenticationCallback(token: string, userId: uuid) {
     localStorage.setItem('token', token);
     this.authStore.isLoggedIn = true;
+    this.authStore.userId = userId;
     this.router.navigate([AppConstants.Routes.HOME]);
   }
 
@@ -34,7 +36,7 @@ export class AuthService {
         Password: password,
       }).pipe(
         tap(async (res: AuthResponse) => {
-          this.authenticationCallback(res.token);
+          this.authenticationCallback(res.token, res.userId);
           resolve(true); // Resolve true on success
         })
       ).subscribe({
@@ -52,6 +54,10 @@ export class AuthService {
     this.authStore.isLoggedIn = false;
   }
 
+  public getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
   public async register(username: string, password: string): Promise<ProblemDetails | null> {
     return new Promise((resolve) => {
       this.httpClient.post<AuthResponse>(`${this.authBaseUrl}/register`, {
@@ -59,7 +65,7 @@ export class AuthService {
         Password: password,
       }).pipe(
         tap((res: AuthResponse) => {
-          this.authenticationCallback(res.token);
+          this.authenticationCallback(res.token, res.userId);
           resolve(null);
         })
       ).subscribe({

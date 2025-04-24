@@ -1,11 +1,11 @@
 import {Component} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {AuthService} from '../../services/auth.service';
-import {AppMessageStore} from '../../services/app-message.store';
+import {AppMessageStore} from '../../stores/app-message.store';
 import {AppConstants} from '../../appConstants';
 import {firstValueFrom} from 'rxjs';
 import {AsyncPipe} from '@angular/common';
-import {AuthStore} from '../../services/auth.store';
+import {AuthStore} from '../../stores/auth.store';
 
 @Component({
   selector: 'app-login-page',

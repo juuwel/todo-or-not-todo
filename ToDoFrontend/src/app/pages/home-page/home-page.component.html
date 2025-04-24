@@ -1,0 +1,24 @@
+<div class="m-4 mt-0 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
+  @for (task of taskStore.tasks | async; track task) {
+    <div class="flex aspect-square items-center justify-center rounded-md shadow-md"
+         [style.background-color]="getRandomColor()">
+      {{ task }}
+    </div>
+  }
+
+  <div
+    class="flex aspect-square items-center justify-center rounded-md bg-gray-200 cursor-pointer hover:bg-gray-300 ease-in-out shadow-md">
+    @if (!isAddingTask) {
+      <span class="material-icons text-7xl" (click)="startAddingTask()">add</span>
+    } @else {
+      <form [formGroup]="taskForm" class="flex flex-col h-full m-3 gap-3 w-full">
+        <input formControlName="title" class="w-full rounded-sm p-3" placeholder="Title">
+        <textarea formControlName="description" class="w-full rounded-sm flex-grow p-3"
+                  placeholder="Description">
+        </textarea>
+
+        <button [disabled]="taskForm.invalid">Add</button>
+      </form>
+    }
+  </div>
+</div>

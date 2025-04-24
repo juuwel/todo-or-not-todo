@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, filter, Observable} from 'rxjs';
-import {MessageTypes} from '../datamodel/message-types';
+import {MessageTypes} from '../datamodel/message.types';
 
 @Injectable({
   providedIn: 'root'

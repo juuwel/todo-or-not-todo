@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import { AppConstants } from '../../appConstants';
-import {AuthStore} from '../../services/auth.store';
+import {AuthStore} from '../../stores/auth.store';
 import {AsyncPipe} from '@angular/common';
 import {AuthService} from '../../services/auth.service';
 

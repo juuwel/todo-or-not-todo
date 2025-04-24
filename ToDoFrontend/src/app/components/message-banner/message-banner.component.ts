@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {AppMessageStore} from '../../services/app-message.store';
+import {AppMessageStore} from '../../stores/app-message.store';
 import {AsyncPipe, NgClass, NgIf} from '@angular/common';
 
 @Component({

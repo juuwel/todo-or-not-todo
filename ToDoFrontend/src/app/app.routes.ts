@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
-import {HomePageComponent} from '../pages/home-page/home-page.component';
-import {LoginPageComponent} from '../pages/login-page/login-page.component';
-import { AppConstants } from '../appConstants';
+import { AppConstants } from './appConstants';
+import {HomePageComponent} from './pages/home-page/home-page.component';
+import {LoginPageComponent} from './pages/login-page/login-page.component';
 
 export const routes: Routes = [
   { path: AppConstants.Routes.HOME, component: HomePageComponent, pathMatch: 'full' },
