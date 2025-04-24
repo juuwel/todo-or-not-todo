@@ -42,11 +42,17 @@ public class UserService(IJwtService jwtService, UserManager<ApplicationUser> us
 
     public async Task<AuthResponse> Register(RegisterRequest request)
     {
-        var user = new ApplicationUser()
+        if (await userManager.FindByEmailAsync(request.Email) is not null)
+        {
+            throw new RegistrationException("User already exists");
+        }
+        
+        var user = new ApplicationUser
         {
             Email = request.Email,
             UserName = request.Email,
         };
+        
         var result = await userManager.CreateAsync(user, request.Password);
 
         if (!result.Succeeded)
@@ -57,11 +63,10 @@ public class UserService(IJwtService jwtService, UserManager<ApplicationUser> us
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
         await userManager.ConfirmEmailAsync(user, token);
 
-        return await Authenticate(new LoginRequest()
+        return await Authenticate(new LoginRequest
         {
             Email = request.Email,
             Password = request.Password,
         });
     }
-    
 }

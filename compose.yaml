@@ -6,6 +6,20 @@
     volumes:
       - ./docs:/usr/local/structurizr
   
+  task-ms:
+    image: task-ms
+    build:
+      context: .
+      dockerfile: TaskMicroservice/Dockerfile
+    ports:
+      - "1000:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres-task;Database=todoapp;Username=postgres;Password=postgres
+      - ASPNETCORE_ENVIRONMENT=development
+    depends_on:
+      - unleash
+      - postgres-task
+
   postgres-task:
     image: postgres:latest
     environment:
@@ -21,7 +35,27 @@
       interval: 10s
       timeout: 5s
       retries: 5
-
+   
+  user-ms:
+    image: user-ms
+    build:
+      context: .
+      dockerfile: UserMicroservice/Dockerfile
+    depends_on:
+      - postgres-user
+      - unleash
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres-user;Database=ToDoOrNotToDo;Username=ToDoOrNotToDo;Password=password
+      - Unleash__ApiUrl=http://unleash:4242/api/
+      - Unleash__ApiToken=default:development.3ffca58933e8662ec78c716e93a26d796f491cbf95175a7f2cd6d0f2
+      - ASPNETCORE_ENVIRONMENT=development
+      - Jwt__Key=ToDoOrNotToDo
+      - Jwt__Issuer=https://to-do-or-not.todo
+      - Jwt__Audience=to-do-or-not.todo
+      - Jwt__ExpirationMinutes=1440
+    ports:
+      - "1001:8080"    
+      
   postgres-user:
     image: postgres:latest
     environment:
@@ -37,51 +71,6 @@
       interval: 10s
       timeout: 5s
       retries: 5
-  unleash-db:
-    image: postgres:latest
-    environment:
-      POSTGRES_PASSWORD: unleash
-      POSTGRES_USER: unleash
-      POSTGRES_DB: unleash
-    volumes:
-      - unleash-db-data:/var/lib/postgresql/data
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U unleash" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-  
-  task-ms:
-    image: task-ms
-    build:
-      context: .
-      dockerfile: TaskMicroservice/Dockerfile
-    ports:
-      - "1000:8080"
-    environment:
-      - ConnectionStrings__DefaultConnection=Host=postgres-user;Database=ToDoOrNotToDo;Username=ToDoOrNotToDo;Password=password
-      - ASPNETCORE_ENVIRONMENT=development
-
-  user-ms:
-    image: user-ms
-    build:
-      context: .
-      dockerfile: UserMicroservice/Dockerfile
-    depends_on:
-      - postgres
-      - unleash
-    environment:
-      - ConnectionStrings__DefaultConnection=Host=postgres;Database=userdb;Username=root;Password=password
-      - Unleash__ApiUrl=http://unleash:4242/api/
-      - Unleash__ApiToken=default:development.3ffca58933e8662ec78c716e93a26d796f491cbf95175a7f2cd6d0f2
-      - ASPNETCORE_ENVIRONMENT=development
-      - Jwt__Key=ToDoOrNotToDo
-      - Jwt__Issuer=https://to-do-or-not.todo
-      - Jwt__Audience=to-do-or-not.todo
-      - Jwt__ExpirationMinutes=1440
-    ports:
-      - "1001:8080"
-  
   
   # Unleash Server (Feature Flag Management)
   unleash-db:

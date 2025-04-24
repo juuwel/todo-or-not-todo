@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Responses;
 using Unleash;
 using UserMicroservice.Application.Services.Interfaces;
-using UserMicroservice.Domain.Entities;
 
 namespace UserMicroservice.Presentation.Apis;
 
