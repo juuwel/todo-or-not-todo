@@ -9,7 +9,9 @@ import {AppConstants} from '../appConstants';
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly baseUrl = "http://localhost:1001/auth";
+  private readonly baseUrl = 'http://localhost:1001';
+  private readonly authBaseUrl = this.baseUrl + "/auth";
+  private readonly featureFlagBaseUrl = this.baseUrl + "/featureFlag/isEnabled";
 
   constructor(
     private httpClient: HttpClient,
@@ -24,7 +26,7 @@ export class AuthService {
 
   public async logIn(username: string, password: string): Promise<boolean> {
     return new Promise((resolve) => {
-      this.httpClient.post<AuthResponse>(`${this.baseUrl}/login`, {
+      this.httpClient.post<AuthResponse>(`${this.authBaseUrl}/login`, {
         Email: username,
         Password: password,
       }).pipe(
@@ -48,7 +50,7 @@ export class AuthService {
 
   public async register(username: string, password: string): Promise<ProblemDetails | null> {
     return new Promise((resolve) => {
-      this.httpClient.post<AuthResponse>(`${this.baseUrl}/register`, {
+      this.httpClient.post<AuthResponse>(`${this.authBaseUrl}/register`, {
         Email: username,
         Password: password,
       }).pipe(
@@ -73,5 +75,9 @@ export class AuthService {
 
   public isUserLoggedIn(): boolean {
     return localStorage.getItem('token') === null;
+  }
+
+  public checkFeatureFlag(featureFlag: string) {
+    return this.httpClient.get<boolean>(`${this.featureFlagBaseUrl}/${featureFlag}`, {});
   }
 }
