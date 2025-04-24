@@ -6,6 +6,51 @@
     volumes:
       - ./docs:/usr/local/structurizr
   
+  postgres-task:
+    image: postgres:latest
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=todoapp
+    ports:
+      - "5433:5432" # Different host port to avoid conflict
+    volumes:
+      - postgres-task-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-user:
+    image: postgres:latest
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=ToDoOrNotToDo
+      - POSTGRES_DB=ToDoOrNotToDo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-user-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ToDoOrNotToDo" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  unleash-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: unleash
+      POSTGRES_USER: unleash
+      POSTGRES_DB: unleash
+    volumes:
+      - unleash-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U unleash" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
   task-ms:
     image: task-ms
     build:
@@ -14,7 +59,7 @@
     ports:
       - "1000:8080"
     environment:
-      - ConnectionStrings__DefaultConnection=Host=postgres;Database=taskdb;Username=root;Password=password
+      - ConnectionStrings__DefaultConnection=Host=postgres-user;Database=ToDoOrNotToDo;Username=ToDoOrNotToDo;Password=password
       - ASPNETCORE_ENVIRONMENT=development
 
   user-ms:
@@ -37,20 +82,6 @@
     ports:
       - "1001:8080"
   
-  postgres:
-    image: postgres:latest
-    environment:
-      POSTGRES_PASSWORD: password
-      POSTGRES_USER: root
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U root"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
   
   # Unleash Server (Feature Flag Management)
   unleash-db:
@@ -61,7 +92,12 @@
       POSTGRES_DB: unleash
     volumes:
       - unleash-db-data:/var/lib/postgresql/data
-  
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U unleash" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   unleash:
     image: unleashorg/unleash-server
     ports:
@@ -79,5 +115,6 @@
       retries: 5
 
 volumes:
-  postgres-data:
+  postgres-task-data:
+  postgres-user-data:
   unleash-db-data:

@@ -3,13 +3,20 @@ using ToDoBackend.Domain.Entities;
 
 namespace ToDoBackend.Infrastructure;
 
-public class ToDoItemDbContext : DbContext
+public class ToDoItemDbContext(DbContextOptions<ToDoItemDbContext> options) : DbContext(options)
 {
-    // TODO: Configure entity relationships
     public virtual DbSet<ToDoItem> ToDoItems { get; set; }
     
-    public ToDoItemDbContext(DbContextOptions<ToDoItemDbContext> options) : base(options)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<ToDoItem>(entity =>
+        {
+            // Set CompletedAt to null by default when a new item is created
+            entity.Property(e => e.CompletedAt)
+                .IsRequired(false)
+                .HasDefaultValue(null);
+        });
     }
-    
 }

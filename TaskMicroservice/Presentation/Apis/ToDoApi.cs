@@ -117,7 +117,7 @@ public static class ToDoApi
     {
         try
         {
-            await toDoService.UpdateToDoItemStatusAsync(taskId, isCompleted);
+            await toDoService.UpdateToDoItemStatusAsync(taskId);
             return TypedResults.NoContent();
         }
         catch (Exception ex) when (ex.Message == "ToDo item not found")
