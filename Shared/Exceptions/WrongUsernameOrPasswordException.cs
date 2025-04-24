@@ -1,4 +1,4 @@
-namespace UserMicroservice.Domain.Exceptions;
+namespace Shared.Exceptions;
 
 public class WrongUsernameOrPasswordException(string error) : CustomException(error)
 {

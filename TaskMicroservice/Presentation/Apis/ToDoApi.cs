@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Exceptions;
 using ToDoBackend.Application.Services.Interfaces;
+using ToDoBackend.Domain.DTOs;
 using ToDoBackend.Domain.Entities;
 
 namespace ToDoBackend.Presentation.Apis;
@@ -9,14 +12,16 @@ public static class ToDoApi
 {
     public static RouteGroupBuilder AddTaskApi(this IEndpointRouteBuilder app)
     {
-        var api = app.MapGroup("/api/v1/tasks");
+        var api = app
+            .MapGroup("/api/v1/tasks")
+            .RequireAuthorization();
 
         // Get all tasks for a user
-        api.MapGet("/{userId}", GetTasksByUserId)
+        api.MapGet("/", GetTasksByUserId)
             .WithName("GetTasksByUserId");
 
         // Get a specific task by ID
-        api.MapGet("/item/{taskId}", GetTaskById)
+        api.MapGet("/item/{taskId:guid}", GetTaskById)
             .WithName("GetTaskById");
             
         // Create a new task
@@ -28,22 +33,23 @@ public static class ToDoApi
             .WithName("UpdateTask");
             
         // Update task status
-        api.MapPatch("/{taskId}/status", UpdateTaskStatus)
+        api.MapPatch("/{taskId:guid}/status", UpdateTaskStatus)
             .WithName("UpdateTaskStatus");
             
         // Delete a task
-        api.MapDelete("/{taskId}", DeleteTask)
+        api.MapDelete("/{taskId:guid}", DeleteTask)
             .WithName("DeleteTask");
 
         return api;
     }
     
     private static async Task<Results<Ok<List<ToDoItem>>, ProblemHttpResult>> GetTasksByUserId(
-        Guid userId, 
-        [FromServices] IToDoService toDoService)
+        [FromServices] IToDoService toDoService,
+        HttpContext context)
     {
         try
         {
+            var userId = UnpackUserId(context);
             var tasks = await toDoService.GetToDoItemsByUserIdAsync(userId);
             return TypedResults.Ok(tasks);
         }
@@ -73,13 +79,16 @@ public static class ToDoApi
     }
     
     private static async Task<Results<Created<ToDoItem>, Conflict, ProblemHttpResult>> CreateTask(
-        [FromBody] ToDoItem toDoItem, 
-        [FromServices] IToDoService toDoService)
+        [FromBody] ToDoItemCreateDto toDoItemCreateDto, 
+        [FromServices] IToDoService toDoService,
+        HttpContext context
+        )
     {
         try
         {
-            await toDoService.CreateToDoItemAsync(toDoItem);
-            return TypedResults.Created($"/api/v1/tasks/item/{toDoItem.Id}", toDoItem);
+            var userId = UnpackUserId(context);
+            var item = await toDoService.CreateToDoItemAsync(toDoItemCreateDto, userId);
+            return TypedResults.Created($"/api/v1/tasks/item/{item.Id}", item);
         }
         catch (Exception ex) when (ex.Message == "ToDo item already exists")
         {
@@ -147,5 +156,21 @@ public static class ToDoApi
         {
             return TypedResults.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
         }
+    }
+
+    private static Guid UnpackUserId(HttpContext context)
+    {
+        var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+        {
+            throw new ActionUnauthorizedException("User ID claim not found.");
+        }
+
+        if (Guid.TryParse(userIdClaim.Value, out var userId))
+        {
+            return userId;
+        }
+        
+        throw new ActionUnauthorizedException("User ID claim is not a valid GUID.");
     }
 }

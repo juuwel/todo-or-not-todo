@@ -1,4 +1,5 @@
 ﻿using ToDoBackend.Application.Services.Interfaces;
+using ToDoBackend.Domain.DTOs;
 using ToDoBackend.Domain.Entities;
 using ToDoBackend.Infrastructure.Repositories.Interfaces;
 
@@ -6,35 +7,39 @@ namespace ToDoBackend.Application.Services.Implementation;
 
 public class ToDoService(IToDoItemRepository toDoItemRepository) : IToDoService
 {
-    public async Task CreateToDoItemAsync(ToDoItem toDoItem)
+    public async Task<ToDoItem> CreateToDoItemAsync(ToDoItemCreateDto toDoItemCreateDto, Guid userId)
     {
-        var existingToDoItem = await toDoItemRepository.GetToDoItemByIdAsync(toDoItem.Id);
-        if (existingToDoItem != null)
+        var toDoItem = new ToDoItem
         {
-            throw new Exception("ToDo item already exists");
-        }
-        await toDoItemRepository.CreateToDoItemAsync(toDoItem);
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            Title = toDoItemCreateDto.Title,
+            Description = toDoItemCreateDto.Description,
+            CreatedAt = DateTime.UtcNow
+        };
         
+        return await toDoItemRepository.CreateToDoItemAsync(toDoItem);
     }
 
-    public async Task UpdateToDoItemAsync(ToDoItem toDoItem)
+    public async Task<ToDoItem> UpdateToDoItemAsync(ToDoItem toDoItem)
     {
         var existingToDoItem = await toDoItemRepository.GetToDoItemByIdAsync(toDoItem.Id);
         if (existingToDoItem == null)
         {
             throw new Exception("ToDo item not found");
         }
-        await toDoItemRepository.UpdateToDoItemAsync(toDoItem);
+        
+        return await toDoItemRepository.UpdateToDoItemAsync(toDoItem);
     }
 
-    public async Task UpdateToDoItemStatusAsync(Guid toDoItemId)
+    public async Task<ToDoItem> UpdateToDoItemStatusAsync(Guid toDoItemId)
     {
         var existingToDoItem = await toDoItemRepository.GetToDoItemByIdAsync(toDoItemId);
         if (existingToDoItem == null)
         {
             throw new Exception("ToDo item not found");
         }
-        await toDoItemRepository.ToggleToDoItemStatusAsync(toDoItemId);
+        return await toDoItemRepository.ToggleToDoItemStatusAsync(toDoItemId);
     }
 
     public async Task DeleteToDoItemAsync(Guid toDoItemId)

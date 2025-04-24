@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace UserMicroservice.Domain.Exceptions;
+namespace Shared.Exceptions;
 
 public class RegistrationException(string error) : CustomException(error)
 {

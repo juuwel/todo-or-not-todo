@@ -6,38 +6,40 @@ namespace ToDoBackend.Infrastructure.Repositories.Implementation;
 
 public class ToDoItemRepository(ToDoItemDbContext context) : IToDoItemRepository
 {
-    public async Task CreateToDoItemAsync(ToDoItem toDoItem)
+    public async Task<ToDoItem> CreateToDoItemAsync(ToDoItem toDoItem)
     {
         var result = await context.ToDoItems.AddAsync(toDoItem);
         await context.SaveChangesAsync();
+        return result.Entity;
     }
 
-    public async Task UpdateToDoItemAsync(ToDoItem toDoItem)
+    public async Task<ToDoItem?> UpdateToDoItemAsync(ToDoItem toDoItem)
     {
         var existingToDoItem = await context.ToDoItems.FindAsync(toDoItem.Id);
-        if (existingToDoItem != null)
-        {
-            existingToDoItem.Title = toDoItem.Title;
-            existingToDoItem.Description = toDoItem.Description;
-            await context.SaveChangesAsync();
-        }
+        if (existingToDoItem == null) return null;
+        
+        existingToDoItem.Title = toDoItem.Title;
+        existingToDoItem.Description = toDoItem.Description;
+        await context.SaveChangesAsync();
+        return existingToDoItem;
     }
 
-    public async Task ToggleToDoItemStatusAsync(Guid toDoItemId)
+    public async Task<ToDoItem?> ToggleToDoItemStatusAsync(Guid toDoItemId)
     {
         var existingToDoItem = await context.ToDoItems.FindAsync(toDoItemId);
-        if (existingToDoItem != null)
+        if (existingToDoItem == null) return null;
+
+        if (existingToDoItem.CompletedAt == null)
         {
-            if (existingToDoItem.CompletedAt == null)
-            {
-                existingToDoItem.CompletedAt = DateTime.UtcNow;
-            }
-            else
-            {
-                existingToDoItem.CompletedAt = null;
-            }
-            await context.SaveChangesAsync();
+            existingToDoItem.CompletedAt = DateTime.UtcNow;
         }
+        else
+        {
+            existingToDoItem.CompletedAt = null;
+        }
+        
+        await context.SaveChangesAsync();
+        return existingToDoItem;
     }
 
     public async Task DeleteToDoItemAsync(Guid toDoItemId)

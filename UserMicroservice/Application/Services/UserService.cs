@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
+using Shared.Exceptions;
 using Shared.Responses;
 using UserMicroservice.Application.Services.Interfaces;
 using UserMicroservice.Domain.Entities;
-using UserMicroservice.Domain.Exceptions;
 
 namespace UserMicroservice.Application.Services;
 

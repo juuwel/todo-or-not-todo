@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Shared;
+using Shared.Handlers;
 using Unleash;
 using Unleash.ClientFactory;
-using UserMicroservice.Application.Handlers;
 using UserMicroservice.Application.Services;
 using UserMicroservice.Application.Services.Interfaces;
 using UserMicroservice.Core.Configuration;
@@ -32,34 +32,11 @@ builder.Services.AddDefaultIdentity<ApplicationUser>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        var jwtConfig = builder.Configuration.GetSection("Jwt");
-        var key = Encoding.UTF8.GetBytes(jwtConfig.GetValue<string>("Key")
-                                         ?? throw new NullReferenceException("JWT key cannot be null"));
-        options.SaveToken = true;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtConfig.GetValue<string>("Issuer"),
-            ValidAudience = jwtConfig.GetValue<string>("Audience"),
-            IssuerSigningKey = new SymmetricSecurityKey(key)
-        };
-    });
+builder.Services.AddCustomAuthenticationAndAuthorization(builder.Configuration);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-
-builder.Services.AddProblemDetails();
 
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserService, UserService>();

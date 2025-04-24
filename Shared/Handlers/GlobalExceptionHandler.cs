@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using UserMicroservice.Domain.Exceptions;
+using Shared.Exceptions;
 
-namespace UserMicroservice.Application.Handlers;
+namespace Shared.Handlers;
 
 public class GlobalExceptionHandler : IExceptionHandler
 {
