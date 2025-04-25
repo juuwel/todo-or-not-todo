@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using ToDoBackend.Application.Services.Interfaces;
+using ToDoBackend.Domain.DTOs;
 using ToDoBackend.Domain.Entities;
 
 namespace ToDoBackend.Presentation.Apis;
@@ -73,11 +74,21 @@ public static class ToDoApi
     }
     
     private static async Task<Results<Created<ToDoItem>, Conflict, ProblemHttpResult>> CreateTask(
-        [FromBody] ToDoItem toDoItem, 
+        [FromBody] CreateToDoItemDto toDoItemDto, 
         [FromServices] IToDoService toDoService)
     {
         try
         {
+            var toDoItem = new ToDoItem
+            {
+                Id = Guid.NewGuid(),
+                UserId = toDoItemDto.UserId,
+                Title = toDoItemDto.Title,
+                Description = toDoItemDto.Description,
+                CreatedAt = DateTime.UtcNow,
+                CompletedAt = null
+            };
+
             await toDoService.CreateToDoItemAsync(toDoItem);
             return TypedResults.Created($"/api/v1/tasks/item/{toDoItem.Id}", toDoItem);
         }
@@ -92,17 +103,19 @@ public static class ToDoApi
     }
     
     private static async Task<Results<NoContent, NotFound, ProblemHttpResult>> UpdateTask(
-        [FromBody] ToDoItem toDoItem, 
+        [FromBody] UpdateToDoItemDto toDoItemDto,
         [FromServices] IToDoService toDoService)
     {
         try
         {
-            await toDoService.UpdateToDoItemAsync(toDoItem);
+            var exists = await toDoService.GetToDoItemByIdAsync(toDoItemDto.Id);
+            if (exists == null)
+            {
+                return TypedResults.NotFound();
+            }
+        
+            await toDoService.UpdateToDoItemAsync(toDoItemDto);
             return TypedResults.NoContent();
-        }
-        catch (Exception ex) when (ex.Message == "ToDo item not found")
-        {
-            return TypedResults.NotFound();
         }
         catch (Exception ex)
         {
@@ -111,13 +124,18 @@ public static class ToDoApi
     }
     
     private static async Task<Results<NoContent, NotFound, ProblemHttpResult>> UpdateTaskStatus(
-        Guid taskId, 
-        [FromBody] bool isCompleted, 
+        Guid taskId,
         [FromServices] IToDoService toDoService)
     {
         try
         {
-            await toDoService.UpdateToDoItemStatusAsync(taskId);
+            var toDoItem = await toDoService.GetToDoItemByIdAsync(taskId);
+            if (toDoItem == null)
+            {
+                return TypedResults.NotFound();
+            }
+            
+            await toDoService.UpdateToDoItemStatusAsync(toDoItem.Id);
             return TypedResults.NoContent();
         }
         catch (Exception ex) when (ex.Message == "ToDo item not found")

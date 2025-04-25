@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ToDoBackend.Domain.DTOs;
 using ToDoBackend.Domain.Entities;
 using ToDoBackend.Infrastructure.Repositories.Interfaces;
 
@@ -12,7 +13,7 @@ public class ToDoItemRepository(ToDoItemDbContext context) : IToDoItemRepository
         await context.SaveChangesAsync();
     }
 
-    public async Task UpdateToDoItemAsync(ToDoItem toDoItem)
+    public async Task UpdateToDoItemAsync(UpdateToDoItemDto toDoItem)
     {
         var existingToDoItem = await context.ToDoItems.FindAsync(toDoItem.Id);
         if (existingToDoItem != null)

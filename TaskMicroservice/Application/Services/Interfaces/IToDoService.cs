@@ -1,4 +1,5 @@
-﻿using ToDoBackend.Domain.Entities;
+﻿using ToDoBackend.Domain.DTOs;
+using ToDoBackend.Domain.Entities;
 
 namespace ToDoBackend.Application.Services.Interfaces;
 
@@ -6,7 +7,7 @@ public interface IToDoService
 {
     Task CreateToDoItemAsync(ToDoItem toDoItem);
     
-    Task UpdateToDoItemAsync(ToDoItem toDoItem);
+    Task UpdateToDoItemAsync(UpdateToDoItemDto toDoItem);
     
     Task UpdateToDoItemStatusAsync(Guid toDoItemId);
     

@@ -1,4 +1,5 @@
 ﻿using ToDoBackend.Application.Services.Interfaces;
+using ToDoBackend.Domain.DTOs;
 using ToDoBackend.Domain.Entities;
 using ToDoBackend.Infrastructure.Repositories.Interfaces;
 
@@ -17,7 +18,7 @@ public class ToDoService(IToDoItemRepository toDoItemRepository) : IToDoService
         
     }
 
-    public async Task UpdateToDoItemAsync(ToDoItem toDoItem)
+    public async Task UpdateToDoItemAsync(UpdateToDoItemDto toDoItem)
     {
         var existingToDoItem = await toDoItemRepository.GetToDoItemByIdAsync(toDoItem.Id);
         if (existingToDoItem == null)
