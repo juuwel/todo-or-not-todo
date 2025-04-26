@@ -44,16 +44,14 @@ public static class ToDoApi
     }
 
     private static async Task<Results<Ok<List<ToDoItem>>, ProblemHttpResult>> GetTasksByUserId(
-        [FromServices] IToDoService toDoService,
-        HttpContext context)
+        [FromServices] IToDoService toDoService)
     {
-        var userId = UnpackUserId(context);
-        var tasks = await toDoService.GetToDoItemsByUserIdAsync(userId);
+        var tasks = await toDoService.GetToDoItemsByUserIdAsync();
         return TypedResults.Ok(tasks);
     }
 
     private static async Task<Results<Ok<ToDoItem>, NotFound, ProblemHttpResult>> GetTaskById(
-        Guid taskId,
+        [FromRoute] Guid taskId,
         [FromServices] IToDoService toDoService)
     {
         var task = await toDoService.GetToDoItemByIdAsync(taskId);
@@ -62,17 +60,15 @@ public static class ToDoApi
 
     private static async Task<Results<Created<ToDoItem>, Conflict, ProblemHttpResult>> CreateTask(
         [FromBody] ToDoItemCreateDto toDoItemCreateDto,
-        [FromServices] IToDoService toDoService,
-        HttpContext context
+        [FromServices] IToDoService toDoService
     )
     {
-        var userId = UnpackUserId(context);
-        var item = await toDoService.CreateToDoItemAsync(toDoItemCreateDto, userId);
+        var item = await toDoService.CreateToDoItemAsync(toDoItemCreateDto);
         return TypedResults.Created($"/api/v1/tasks/item/{item.Id}", item);
     }
 
     private static async Task<Results<NoContent, NotFound, ProblemHttpResult>> UpdateTask(
-        [FromBody] ToDoItem toDoItem,
+        [FromBody] ToDoItemUpdateDto toDoItem,
         [FromServices] IToDoService toDoService)
     {
         await toDoService.UpdateToDoItemAsync(toDoItem);
@@ -93,21 +89,5 @@ public static class ToDoApi
     {
         await toDoService.DeleteToDoItemAsync(taskId);
         return TypedResults.NoContent();
-    }
-
-    private static Guid UnpackUserId(HttpContext context)
-    {
-        var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier);
-        if (userIdClaim == null)
-        {
-            throw new ActionUnauthorizedException("User ID claim not found.");
-        }
-
-        if (Guid.TryParse(userIdClaim.Value, out var userId))
-        {
-            return userId;
-        }
-
-        throw new ActionUnauthorizedException("User ID claim is not a valid GUID.");
     }
 }

@@ -13,43 +13,17 @@ public class ToDoItemRepository(ToDoItemDbContext context) : IToDoItemRepository
         return result.Entity;
     }
 
-    public async Task<ToDoItem?> UpdateToDoItemAsync(ToDoItem toDoItem)
+    public async Task<ToDoItem> UpdateToDoItemAsync(ToDoItem toDoItem)
     {
-        var existingToDoItem = await context.ToDoItems.FindAsync(toDoItem.Id);
-        if (existingToDoItem == null) return null;
-        
-        existingToDoItem.Title = toDoItem.Title;
-        existingToDoItem.Description = toDoItem.Description;
+        var result = context.ToDoItems.Update(toDoItem);
         await context.SaveChangesAsync();
-        return existingToDoItem;
+        return result.Entity;
     }
 
-    public async Task<ToDoItem?> ToggleToDoItemStatusAsync(Guid toDoItemId)
+    public async Task DeleteToDoItemAsync(ToDoItem toDoItem)
     {
-        var existingToDoItem = await context.ToDoItems.FindAsync(toDoItemId);
-        if (existingToDoItem == null) return null;
-
-        if (existingToDoItem.CompletedAt == null)
-        {
-            existingToDoItem.CompletedAt = DateTime.UtcNow;
-        }
-        else
-        {
-            existingToDoItem.CompletedAt = null;
-        }
-        
+        context.ToDoItems.Remove(toDoItem);
         await context.SaveChangesAsync();
-        return existingToDoItem;
-    }
-
-    public async Task DeleteToDoItemAsync(Guid toDoItemId)
-    {
-        var existingToDoItem = await context.ToDoItems.FindAsync(toDoItemId);
-        if (existingToDoItem != null)
-        {
-            context.ToDoItems.Remove(existingToDoItem);
-            await context.SaveChangesAsync();
-        }
     }
 
     public async Task<List<ToDoItem>> GetToDoItemsByUserIdAsync(Guid userId)

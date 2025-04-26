@@ -23,12 +23,15 @@ builder.Services.AddDbContext<ToDoItemDbContext>(options =>
 
 builder.Services.AddCustomAuthenticationAndAuthorization(builder.Configuration);
 
-builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<IToDoService, ToDoService>();
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddScoped<IToDoItemRepository, ToDoItemRepository>();
+builder.Services.AddScoped<IToDoService, ToDoService>();
+builder.Services.AddControllers();
+
 
 builder.Services.AddCorsPolicy(builder.Configuration);
 

@@ -6,11 +6,9 @@ public interface IToDoItemRepository
 {
     Task<ToDoItem> CreateToDoItemAsync(ToDoItem toDoItem);
     
-    Task<ToDoItem?> UpdateToDoItemAsync(ToDoItem toDoItem);
+    Task<ToDoItem> UpdateToDoItemAsync(ToDoItem toDoItem);
     
-    Task<ToDoItem?> ToggleToDoItemStatusAsync(Guid toDoItemId);
-    
-    Task DeleteToDoItemAsync(Guid toDoItemId);
+    Task DeleteToDoItemAsync(ToDoItem toDoItem);
     
     Task<List<ToDoItem>> GetToDoItemsByUserIdAsync(Guid userId);
     
