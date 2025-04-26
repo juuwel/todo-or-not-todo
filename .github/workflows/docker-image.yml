@@ -23,7 +23,7 @@ jobs:
         run: |
           # Extract tag name that triggered the workflow
           TAG_NAME=${GITHUB_REF#refs/tags/}
-          echo "🚀 Deploying tag: ${TAG_NAME}"
+          echo "🚀 Deploying tag: ${GITHUB_REF#refs/tags/}"
       
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'ENDSSH'
             echo "📥 Connected to server: $(hostname)"
@@ -47,8 +47,8 @@ jobs:
             echo "✅ Fetch completed"
           
             # Checkout to the specific tag that triggered this workflow
-            echo "🔖 Checking out tag: ${TAG_NAME}"
-            git checkout tags/${TAG_NAME}
+            echo "🔖 Checking out tag: ${GITHUB_REF#refs/tags/}"
+            git checkout tags/${GITHUB_REF#refs/tags/}
             echo "✅ Checkout completed"
           
             # Set environment variables for compose.yaml
