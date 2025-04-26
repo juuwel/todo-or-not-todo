@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ToDoBackend.Infrastructure;
@@ -11,9 +12,11 @@ using ToDoBackend.Infrastructure;
 namespace ToDoBackend.Migrations
 {
     [DbContext(typeof(ToDoItemDbContext))]
-    partial class ToDoItemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250426114358_LimitTitleAndDescriptionLength")]
+    partial class LimitTitleAndDescriptionLength
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

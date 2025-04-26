@@ -73,12 +73,12 @@ export class TaskService {
       );
   }
 
-  public async updateTask(taskId: uuid, updateTaskItemDto: UpdateTaskItemDto): Promise<void> {
+  public async updateTask(updateTaskItemDto: UpdateTaskItemDto): Promise<void> {
     this.httpClient.put<TaskItemDto>(`${this.taskBaseUrl}`, updateTaskItemDto)
       .subscribe(
         {
           next: (updatedTask) => {
-            const index = this.taskStore.tasks.findIndex(task => task.id === updatedTask.id);
+            const index = this.taskStore.tasks.findIndex(task => task.id === updateTaskItemDto.id);
             if (index !== -1) {
               const newTasks = [...this.taskStore.tasks];
               newTasks[index] = updatedTask;

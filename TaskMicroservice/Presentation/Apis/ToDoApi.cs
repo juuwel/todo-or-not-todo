@@ -43,14 +43,14 @@ public static class ToDoApi
         return api;
     }
 
-    private static async Task<Results<Ok<List<ToDoItem>>, ProblemHttpResult>> GetTasksByUserId(
+    private static async Task<Results<Ok<List<ToDoItemDto>>, ProblemHttpResult>> GetTasksByUserId(
         [FromServices] IToDoService toDoService)
     {
         var tasks = await toDoService.GetToDoItemsByUserIdAsync();
         return TypedResults.Ok(tasks);
     }
 
-    private static async Task<Results<Ok<ToDoItem>, NotFound, ProblemHttpResult>> GetTaskById(
+    private static async Task<Results<Ok<ToDoItemDto>, NotFound, ProblemHttpResult>> GetTaskById(
         [FromRoute] Guid taskId,
         [FromServices] IToDoService toDoService)
     {
@@ -58,7 +58,7 @@ public static class ToDoApi
         return TypedResults.Ok(task);
     }
 
-    private static async Task<Results<Created<ToDoItem>, Conflict, ProblemHttpResult>> CreateTask(
+    private static async Task<Results<Created<ToDoItemDto>, Conflict, ProblemHttpResult>> CreateTask(
         [FromBody] ToDoItemCreateDto toDoItemCreateDto,
         [FromServices] IToDoService toDoService
     )
@@ -67,20 +67,20 @@ public static class ToDoApi
         return TypedResults.Created($"/api/v1/tasks/item/{item.Id}", item);
     }
 
-    private static async Task<Results<NoContent, NotFound, ProblemHttpResult>> UpdateTask(
+    private static async Task<Results<Ok<ToDoItemDto>, NotFound, ProblemHttpResult>> UpdateTask(
         [FromBody] ToDoItemUpdateDto toDoItem,
         [FromServices] IToDoService toDoService)
     {
-        await toDoService.UpdateToDoItemAsync(toDoItem);
-        return TypedResults.NoContent();
+        var item = await toDoService.UpdateToDoItemAsync(toDoItem);
+        return TypedResults.Ok(item);
     }
 
-    private static async Task<Results<NoContent, NotFound, ProblemHttpResult>> UpdateTaskStatus(
+    private static async Task<Results<Ok<ToDoItemDto>, NotFound, ProblemHttpResult>> UpdateTaskStatus(
         Guid taskId,
         [FromServices] IToDoService toDoService)
     {
-        await toDoService.UpdateToDoItemStatusAsync(taskId);
-        return TypedResults.NoContent();
+        var item = await toDoService.UpdateToDoItemStatusAsync(taskId);
+        return TypedResults.Ok(item);
     }
 
     private static async Task<Results<NoContent, NotFound, ProblemHttpResult>> DeleteTask(

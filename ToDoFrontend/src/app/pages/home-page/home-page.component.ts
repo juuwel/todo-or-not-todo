@@ -29,7 +29,7 @@ export class HomePageComponent {
   }
 
   async taskUpdated($event: UpdateTaskItemDto) {
-    await this.taskService.updateTask($event.id, $event);
+    await this.taskService.updateTask($event);
   }
 
   async taskDeleted($event: uuid) {

@@ -9,7 +9,7 @@ namespace ToDoBackend.Application.Services.Implementation;
 
 public class ToDoService(IToDoItemRepository toDoItemRepository, IHttpContextAccessor httpContextAccessor) : IToDoService
 {
-    public async Task<ToDoItem> CreateToDoItemAsync(ToDoItemCreateDto toDoItemCreateDto)
+    public async Task<ToDoItemDto> CreateToDoItemAsync(ToDoItemCreateDto toDoItemCreateDto)
     {
         var userId = UnpackUserId();
         
@@ -22,18 +22,20 @@ public class ToDoService(IToDoItemRepository toDoItemRepository, IHttpContextAcc
             CreatedAt = DateTime.UtcNow
         };
         
-        return await toDoItemRepository.CreateToDoItemAsync(toDoItem);
+        var result = await toDoItemRepository.CreateToDoItemAsync(toDoItem);
+        return result.ToDto();
     }
 
-    public async Task<ToDoItem> UpdateToDoItemAsync(ToDoItemUpdateDto toDoItem)
+    public async Task<ToDoItemDto> UpdateToDoItemAsync(ToDoItemUpdateDto toDoItem)
     {
         var existingToDoItem = await CheckForNullAndUserAuthorization(toDoItem.Id);
         existingToDoItem.Title = toDoItem.Title;
         existingToDoItem.Description = toDoItem.Description;
-        return await toDoItemRepository.UpdateToDoItemAsync(existingToDoItem);
+        var result = await toDoItemRepository.UpdateToDoItemAsync(existingToDoItem);
+        return result.ToDto();
     }
 
-    public async Task<ToDoItem> UpdateToDoItemStatusAsync(Guid toDoItemId)
+    public async Task<ToDoItemDto> UpdateToDoItemStatusAsync(Guid toDoItemId)
     {
         var existingToDoItem = await CheckForNullAndUserAuthorization(toDoItemId);
         if (existingToDoItem.CompletedAt == null)
@@ -45,7 +47,8 @@ public class ToDoService(IToDoItemRepository toDoItemRepository, IHttpContextAcc
             existingToDoItem.CompletedAt = null;
         }
         
-        return await toDoItemRepository.UpdateToDoItemAsync(existingToDoItem);
+        var result = await toDoItemRepository.UpdateToDoItemAsync(existingToDoItem);
+        return result.ToDto();
     }
 
     public async Task DeleteToDoItemAsync(Guid toDoItemId)
@@ -54,17 +57,17 @@ public class ToDoService(IToDoItemRepository toDoItemRepository, IHttpContextAcc
         await toDoItemRepository.DeleteToDoItemAsync(existingToDoItem);
     }
 
-    public async Task<List<ToDoItem>> GetToDoItemsByUserIdAsync()
+    public async Task<List<ToDoItemDto>> GetToDoItemsByUserIdAsync()
     {
         var userId = UnpackUserId();
         var toDoItems = await toDoItemRepository.GetToDoItemsByUserIdAsync(userId);
-        return toDoItems.ToList();
+        return toDoItems.Select(x => x.ToDto()).ToList();
     }
 
-    public async Task<ToDoItem?> GetToDoItemByIdAsync(Guid toDoItemId)
+    public async Task<ToDoItemDto?> GetToDoItemByIdAsync(Guid toDoItemId)
     {
         var toDoItem = await CheckForNullAndUserAuthorization(toDoItemId);
-        return toDoItem;
+        return toDoItem.ToDto();
     }
     
     private Guid UnpackUserId()
