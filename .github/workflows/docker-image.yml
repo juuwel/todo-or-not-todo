@@ -54,6 +54,7 @@ jobs:
             # Set environment variables for compose.yaml
             echo "🔐 Setting environment variables for docker-compose"
             export UNLEASH_API_TOKEN="${{ secrets.UNLEASH_API_TOKEN }}"
+            export SERVER_HOST="${{ secrets.SERVER_HOST }}"
             echo "✅ Environment variables set"
       
             # Create a temporary environment file with correct URLs for production build
