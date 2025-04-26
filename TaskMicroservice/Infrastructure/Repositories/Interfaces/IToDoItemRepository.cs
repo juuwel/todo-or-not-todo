@@ -1,4 +1,5 @@
-﻿using ToDoBackend.Domain.Entities;
+﻿using ToDoBackend.Domain.DTOs;
+using ToDoBackend.Domain.Entities;
 
 namespace ToDoBackend.Infrastructure.Repositories.Interfaces;
 

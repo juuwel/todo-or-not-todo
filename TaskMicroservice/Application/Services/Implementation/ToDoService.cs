@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Shared.Exceptions;
 using ToDoBackend.Application.Services.Interfaces;
 using ToDoBackend.Domain.DTOs;
