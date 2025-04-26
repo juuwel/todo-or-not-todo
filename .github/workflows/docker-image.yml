@@ -63,7 +63,7 @@ jobs:
             echo "  taskMsBaseUrl: 'http://${{secrets.SERVER_HOST}}:1000/api/v1/tasks'," >> ToDoFrontend/src/environments/environment.production.ts
             echo "  userMsBaseUrl: 'http://${{secrets.SERVER_HOST}}:1001'," >> ToDoFrontend/src/environments/environment.production.ts
             echo '};' >> ToDoFrontend/src/environments/environment.production.ts
-            echo "✅ Environment file created with SERVER_HOST: ${{secrets.SERVER_HOST_test}}"          
+            echo "✅ Environment file created with SERVER_HOST: ${{secrets.SERVER_HOST_TEST}}"          
           
             # Start all services
             echo "🐳 Starting Docker containers..."
