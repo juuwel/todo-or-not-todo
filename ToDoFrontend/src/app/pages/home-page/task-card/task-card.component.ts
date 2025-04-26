@@ -26,7 +26,10 @@ export class TaskCardComponent implements OnInit {
 
   protected taskForm: FormGroup;
   protected isInputMode = false;
+
   protected color: string = this.getRandomColor();
+  protected inputColor: string = this.createShadeFromBgColor(30);
+  protected buttonColor: string = this.createShadeFromBgColor(-30);
 
   constructor(
     private fb: FormBuilder,
@@ -51,6 +54,18 @@ export class TaskCardComponent implements OnInit {
     const randomGreen = Math.floor((Math.random() * 128) + 127);
     const randomBlue = Math.floor((Math.random() * 128) + 127);
     return `rgb(${randomRed}, ${randomGreen}, ${randomBlue})`;
+  }
+
+  private createShadeFromBgColor(percent: number): string {
+    const rgb = this.color.match(/\d+/g)!.map(Number); // Extract RGB values
+    if (!rgb) return this.color; // Fallback if parsing fails
+
+    const adjustedRgb = rgb.map(value => {
+      const adjustment = Math.floor((255 - value) * (percent / 100)); // Calculate adjustment for lightening
+      return Math.min(255, Math.max(0, value + adjustment)); // Ensure the value stays between 0 and 255
+    });
+
+    return `rgb(${adjustedRgb.join(', ')})`;
   }
 
   protected onSaveClicked(): void {

@@ -1,11 +1,10 @@
-﻿import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {BehaviorSubject, tap} from 'rxjs';
-import {Router} from '@angular/router';
-import {AuthResponse, ProblemDetails} from '../datamodel/api-response.types';
-import {AppConstants} from '../appConstants';
-import {AuthStore} from '../stores/auth.store';
-import {uuid} from '../datamodel/task.types';
+﻿import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+import { tap } from 'rxjs';
+import { AppConstants } from '../appConstants';
+import { AuthResponse, ProblemDetails } from '../datamodel/api-response.types';
+import { AuthStore } from '../stores/auth.store';
 
 @Injectable({
   providedIn: 'root'
@@ -20,12 +19,14 @@ export class AuthService {
     private router: Router,
     private authStore: AuthStore,
   ) {
+    // Check if the user is already logged in when the service is initialized
+    const token = localStorage.getItem('token');
+    this.authStore.isLoggedIn = !!token;
   }
 
-  public authenticationCallback(token: string, userId: uuid) {
+  public authenticationCallback(token: string) {
     localStorage.setItem('token', token);
     this.authStore.isLoggedIn = true;
-    this.authStore.userId = userId;
     this.router.navigate([AppConstants.Routes.HOME]);
   }
 
@@ -36,7 +37,7 @@ export class AuthService {
         Password: password,
       }).pipe(
         tap(async (res: AuthResponse) => {
-          this.authenticationCallback(res.token, res.userId);
+          this.authenticationCallback(res.token);
           resolve(true); // Resolve true on success
         })
       ).subscribe({
@@ -65,7 +66,7 @@ export class AuthService {
         Password: password,
       }).pipe(
         tap((res: AuthResponse) => {
-          this.authenticationCallback(res.token, res.userId);
+          this.authenticationCallback(res.token);
           resolve(null);
         })
       ).subscribe({

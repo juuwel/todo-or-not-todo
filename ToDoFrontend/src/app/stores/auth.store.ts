@@ -8,7 +8,6 @@ import {uuid} from '../datamodel/task.types';
 export class AuthStore  {
   private readonly isRegisteringEnabledSubject = new BehaviorSubject<boolean>(false);
   private readonly isLoggedInSubject = new BehaviorSubject<boolean>(false);
-  private readonly userIdSubject = new BehaviorSubject<uuid | null>(null);
 
   public get isRegisteringEnabled$(): Observable<boolean> {
     return this.isRegisteringEnabledSubject.asObservable();
@@ -22,15 +21,11 @@ export class AuthStore  {
     return this.isLoggedInSubject.asObservable();
   }
 
+  public get isLoggedIn(): boolean {
+    return this.isLoggedInSubject.getValue();
+  }
+
   public set isLoggedIn(value: boolean) {
     this.isLoggedInSubject.next(value);
-  }
-
-  public get userId$(): Observable<uuid | null> {
-    return this.userIdSubject.asObservable();
-  }
-
-  public set userId(value: uuid) {
-    this.userIdSubject.next(value);
   }
 }
