@@ -1,5 +1,5 @@
 <section class="flex flex-col items-center justify-center h-full">
-  <h3 class="mb-4 text-2xl">Log In</h3>
+  <h3 class="mb-4 text-2xl">{{ isRegistering ? 'Register' : 'Log In '}}</h3>
 
   <form [formGroup]="loginForm" class="flex flex-col gap-3" (ngSubmit)="onSubmit()">
     <input type="email" formControlName="email" placeholder="E-mail address"
