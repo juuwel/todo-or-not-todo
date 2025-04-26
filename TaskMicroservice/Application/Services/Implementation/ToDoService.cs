@@ -9,7 +9,7 @@ namespace ToDoBackend.Application.Services.Implementation;
 
 public class ToDoService(IToDoItemRepository toDoItemRepository, IHttpContextAccessor httpContextAccessor) : IToDoService
 {
-    public async Task<ToDoItemDto> CreateToDoItemAsync(ToDoItemCreateDto toDoItemCreateDto)
+    public async Task<ToDoItemDto> CreateToDoItemAsync(CreateToDoItemDto createToDoItemDto)
     {
         var userId = UnpackUserId();
         
@@ -17,8 +17,8 @@ public class ToDoService(IToDoItemRepository toDoItemRepository, IHttpContextAcc
         {
             Id = Guid.NewGuid(),
             UserId = userId,
-            Title = toDoItemCreateDto.Title,
-            Description = toDoItemCreateDto.Description,
+            Title = createToDoItemDto.Title,
+            Description = createToDoItemDto.Description,
             CreatedAt = DateTime.UtcNow
         };
         
@@ -26,11 +26,11 @@ public class ToDoService(IToDoItemRepository toDoItemRepository, IHttpContextAcc
         return result.ToDto();
     }
 
-    public async Task<ToDoItemDto> UpdateToDoItemAsync(ToDoItemUpdateDto toDoItem)
+    public async Task<ToDoItemDto> UpdateToDoItemAsync(UpdateToDoItemDto updateToDoItem)
     {
-        var existingToDoItem = await CheckForNullAndUserAuthorization(toDoItem.Id);
-        existingToDoItem.Title = toDoItem.Title;
-        existingToDoItem.Description = toDoItem.Description;
+        var existingToDoItem = await CheckForNullAndUserAuthorization(updateToDoItem.Id);
+        existingToDoItem.Title = updateToDoItem.Title;
+        existingToDoItem.Description = updateToDoItem.Description;
         var result = await toDoItemRepository.UpdateToDoItemAsync(existingToDoItem);
         return result.ToDto();
     }

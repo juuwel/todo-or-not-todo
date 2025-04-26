@@ -59,19 +59,19 @@ public static class ToDoApi
     }
 
     private static async Task<Results<Created<ToDoItemDto>, Conflict, ProblemHttpResult>> CreateTask(
-        [FromBody] ToDoItemCreateDto toDoItemCreateDto,
+        [FromBody] CreateToDoItemDto createToDoItemDto,
         [FromServices] IToDoService toDoService
     )
     {
-        var item = await toDoService.CreateToDoItemAsync(toDoItemCreateDto);
+        var item = await toDoService.CreateToDoItemAsync(createToDoItemDto);
         return TypedResults.Created($"/api/v1/tasks/item/{item.Id}", item);
     }
 
     private static async Task<Results<Ok<ToDoItemDto>, NotFound, ProblemHttpResult>> UpdateTask(
-        [FromBody] ToDoItemUpdateDto toDoItem,
+        [FromBody] UpdateToDoItemDto updateToDoItem,
         [FromServices] IToDoService toDoService)
     {
-        var item = await toDoService.UpdateToDoItemAsync(toDoItem);
+        var item = await toDoService.UpdateToDoItemAsync(updateToDoItem);
         return TypedResults.Ok(item);
     }
 

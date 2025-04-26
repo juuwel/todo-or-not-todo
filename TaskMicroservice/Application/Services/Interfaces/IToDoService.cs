@@ -5,9 +5,9 @@ namespace ToDoBackend.Application.Services.Interfaces;
 
 public interface IToDoService
 {
-    Task<ToDoItemDto> CreateToDoItemAsync(ToDoItemCreateDto toDoItem);
+    Task<ToDoItemDto> CreateToDoItemAsync(CreateToDoItemDto createToDoItem);
     
-    Task<ToDoItemDto> UpdateToDoItemAsync(ToDoItemUpdateDto toDoItem);
+    Task<ToDoItemDto> UpdateToDoItemAsync(UpdateToDoItemDto updateToDoItem);
     
     Task<ToDoItemDto> UpdateToDoItemStatusAsync(Guid toDoItemId);
     
