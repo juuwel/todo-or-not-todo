@@ -23,139 +23,76 @@ public static class ToDoApi
         // Get a specific task by ID
         api.MapGet("/item/{taskId:guid}", GetTaskById)
             .WithName("GetTaskById");
-            
+
         // Create a new task
         api.MapPost("/", CreateTask)
             .WithName("CreateTask");
-            
+
         // Update a task
         api.MapPut("/", UpdateTask)
             .WithName("UpdateTask");
-            
+
         // Update task status
-        api.MapPatch("/{taskId:guid}/status", UpdateTaskStatus)
+        api.MapPatch("/status/{taskId:guid}", UpdateTaskStatus)
             .WithName("UpdateTaskStatus");
-            
+
         // Delete a task
         api.MapDelete("/{taskId:guid}", DeleteTask)
             .WithName("DeleteTask");
 
         return api;
     }
-    
+
     private static async Task<Results<Ok<List<ToDoItem>>, ProblemHttpResult>> GetTasksByUserId(
         [FromServices] IToDoService toDoService,
         HttpContext context)
     {
-        try
-        {
-            var userId = UnpackUserId(context);
-            var tasks = await toDoService.GetToDoItemsByUserIdAsync(userId);
-            return TypedResults.Ok(tasks);
-        }
-        catch (Exception ex)
-        {
-            return TypedResults.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
-        }
+        var userId = UnpackUserId(context);
+        var tasks = await toDoService.GetToDoItemsByUserIdAsync(userId);
+        return TypedResults.Ok(tasks);
     }
-    
+
     private static async Task<Results<Ok<ToDoItem>, NotFound, ProblemHttpResult>> GetTaskById(
-        Guid taskId, 
+        Guid taskId,
         [FromServices] IToDoService toDoService)
     {
-        try
-        {
-            var task = await toDoService.GetToDoItemByIdAsync(taskId);
-            return TypedResults.Ok(task);
-        }
-        catch (Exception ex) when (ex.Message == "ToDo item not found")
-        {
-            return TypedResults.NotFound();
-        }
-        catch (Exception ex)
-        {
-            return TypedResults.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
-        }
+        var task = await toDoService.GetToDoItemByIdAsync(taskId);
+        return TypedResults.Ok(task);
     }
-    
+
     private static async Task<Results<Created<ToDoItem>, Conflict, ProblemHttpResult>> CreateTask(
-        [FromBody] ToDoItemCreateDto toDoItemCreateDto, 
+        [FromBody] ToDoItemCreateDto toDoItemCreateDto,
         [FromServices] IToDoService toDoService,
         HttpContext context
-        )
+    )
     {
-        try
-        {
-            var userId = UnpackUserId(context);
-            var item = await toDoService.CreateToDoItemAsync(toDoItemCreateDto, userId);
-            return TypedResults.Created($"/api/v1/tasks/item/{item.Id}", item);
-        }
-        catch (Exception ex) when (ex.Message == "ToDo item already exists")
-        {
-            return TypedResults.Conflict();
-        }
-        catch (Exception ex)
-        {
-            return TypedResults.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
-        }
+        var userId = UnpackUserId(context);
+        var item = await toDoService.CreateToDoItemAsync(toDoItemCreateDto, userId);
+        return TypedResults.Created($"/api/v1/tasks/item/{item.Id}", item);
     }
-    
+
     private static async Task<Results<NoContent, NotFound, ProblemHttpResult>> UpdateTask(
-        [FromBody] ToDoItem toDoItem, 
+        [FromBody] ToDoItem toDoItem,
         [FromServices] IToDoService toDoService)
     {
-        try
-        {
-            await toDoService.UpdateToDoItemAsync(toDoItem);
-            return TypedResults.NoContent();
-        }
-        catch (Exception ex) when (ex.Message == "ToDo item not found")
-        {
-            return TypedResults.NotFound();
-        }
-        catch (Exception ex)
-        {
-            return TypedResults.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
-        }
+        await toDoService.UpdateToDoItemAsync(toDoItem);
+        return TypedResults.NoContent();
     }
-    
+
     private static async Task<Results<NoContent, NotFound, ProblemHttpResult>> UpdateTaskStatus(
-        Guid taskId, 
-        [FromBody] bool isCompleted, 
+        Guid taskId,
         [FromServices] IToDoService toDoService)
     {
-        try
-        {
-            await toDoService.UpdateToDoItemStatusAsync(taskId);
-            return TypedResults.NoContent();
-        }
-        catch (Exception ex) when (ex.Message == "ToDo item not found")
-        {
-            return TypedResults.NotFound();
-        }
-        catch (Exception ex)
-        {
-            return TypedResults.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
-        }
+        await toDoService.UpdateToDoItemStatusAsync(taskId);
+        return TypedResults.NoContent();
     }
-    
+
     private static async Task<Results<NoContent, NotFound, ProblemHttpResult>> DeleteTask(
-        Guid taskId, 
+        Guid taskId,
         [FromServices] IToDoService toDoService)
     {
-        try
-        {
-            await toDoService.DeleteToDoItemAsync(taskId);
-            return TypedResults.NoContent();
-        }
-        catch (Exception ex) when (ex.Message == "ToDo item not found")
-        {
-            return TypedResults.NotFound();
-        }
-        catch (Exception ex)
-        {
-            return TypedResults.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
-        }
+        await toDoService.DeleteToDoItemAsync(taskId);
+        return TypedResults.NoContent();
     }
 
     private static Guid UnpackUserId(HttpContext context)
@@ -170,7 +107,7 @@ public static class ToDoApi
         {
             return userId;
         }
-        
+
         throw new ActionUnauthorizedException("User ID claim is not a valid GUID.");
     }
 }
