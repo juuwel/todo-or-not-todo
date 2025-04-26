@@ -1,8 +1,11 @@
-<div class="flex flex-col">
+<div class="flex flex-col w-screen h-screen overflow-hidden">
   <navbar></navbar>
 
-  <main>
-    <router-outlet></router-outlet>
+  <main class="flex-1 overflow-hidden">
+    <div class="m-4 overflow-hidden">
+      <app-message-banner />
+    </div>
+    <router-outlet class="w-full h-full"></router-outlet>
   </main>
 </div>
 

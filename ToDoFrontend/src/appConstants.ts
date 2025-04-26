@@ -3,4 +3,8 @@ export class AppConstants {
     HOME: 'home',
     LOGIN: 'login',
   }
+
+  public static readonly FeatureFlags = {
+    Register: 'allow-register',
+  }
 }

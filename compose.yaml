@@ -1,4 +1,25 @@
 ﻿services:
+  structurizr:
+    image: structurizr/lite
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./docs:/usr/local/structurizr
+  
+  task-ms:
+    image: task-ms
+    build:
+      context: .
+      dockerfile: TaskMicroservice/Dockerfile
+    ports:
+      - "1000:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres-task;Database=todoapp;Username=postgres;Password=postgres
+      - ASPNETCORE_ENVIRONMENT=development
+    depends_on:
+      - unleash
+      - postgres-task
+
   postgres-task:
     image: postgres:latest
     environment:
@@ -14,7 +35,27 @@
       interval: 10s
       timeout: 5s
       retries: 5
-
+   
+  user-ms:
+    image: user-ms
+    build:
+      context: .
+      dockerfile: UserMicroservice/Dockerfile
+    depends_on:
+      - postgres-user
+      - unleash
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres-user;Database=ToDoOrNotToDo;Username=ToDoOrNotToDo;Password=password
+      - Unleash__ApiUrl=http://unleash:4242/api/
+      - Unleash__ApiToken=default:development.3ffca58933e8662ec78c716e93a26d796f491cbf95175a7f2cd6d0f2
+      - ASPNETCORE_ENVIRONMENT=development
+      - Jwt__Key=e4c88641c473e0848a49431c9dafb5462efb3372dadd0403b3b60b8149cc9384
+      - Jwt__Issuer=https://to-do-or-not.todo
+      - Jwt__Audience=to-do-or-not.todo
+      - Jwt__ExpirationMinutes=1440
+    ports:
+      - "1001:8080"    
+      
   postgres-user:
     image: postgres:latest
     environment:
@@ -30,6 +71,8 @@
       interval: 10s
       timeout: 5s
       retries: 5
+  
+  # Unleash Server (Feature Flag Management)
   unleash-db:
     image: postgres:latest
     environment:
@@ -53,37 +96,12 @@
       DATABASE_SSL: "false"
       UNLEASH_URL: http://localhost:4242
     depends_on:
-      unleash-db:
-        condition: service_healthy
-   
-
-  taskmicroservice:
-    image: taskmicroservice
-    build:
-      context: .
-      dockerfile: TaskMicroservice/Dockerfile
-    ports:
-      - "8081:8080"
-    depends_on:
-      postgres-task:
-        condition: service_healthy
-    environment:
-      - ConnectionStrings__DefaultConnection=Host=postgres-task;Database=todoapp;Username=postgres;Password=postgres
-  
-  usermicroservice:
-    image: usermicroservice
-    build:
-      context: .
-      dockerfile: UserMicroservice/Dockerfile
-    depends_on:
-      postgres-user:
-        condition: service_healthy
-      unleash:
-        condition: service_started
-    environment:
-      - ConnectionStrings__DefaultConnection=Host=postgres-user;Database=ToDoOrNotToDo;Username=ToDoOrNotToDo;Password=password
-      - Unleash__ApiUrl=http://unleash:4242/api/
-      - Unleash__ApiToken=default:development.unleash-insecure-api-token
+      - unleash-db
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:4242/health || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres-task-data:

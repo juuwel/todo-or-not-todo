@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Shared;
 using Unleash;
 using Unleash.ClientFactory;
+using UserMicroservice.Application.Handlers;
 using UserMicroservice.Application.Services;
 using UserMicroservice.Application.Services.Interfaces;
 using UserMicroservice.Core.Configuration;
@@ -13,6 +15,9 @@ using UserMicroservice.Infrastructure;
 using UserMicroservice.Presentation.Apis;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 // Register Options
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
@@ -73,7 +78,11 @@ builder.Services.AddSingleton<IUnleash>(serviceProvider =>
     return new UnleashClientFactory().CreateClient(settings, synchronousInitialization: true);
 });
 
+builder.Services.AddCorsPolicy(builder.Configuration);
+
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 // Apply any pending migrations on startup
 using (var scope = app.Services.CreateScope())
@@ -94,11 +103,14 @@ app.UseExceptionHandler();
 
 app.UseStatusCodePages();
 
+app.UseCors(CorsPolicyExtension.CorsPolicyName);
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 // Register APIs
 app.AddAuthApi();
 app.AddUserApi();
+app.AddFeatureFlagApi();
 
 app.Run();

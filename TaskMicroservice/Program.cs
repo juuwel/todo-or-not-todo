@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Shared;
 using ToDoBackend.Application.Services.Implementation;
 using ToDoBackend.Application.Services.Interfaces;
 using ToDoBackend.Infrastructure;
@@ -25,6 +26,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IToDoService, ToDoService>();
 builder.Services.AddScoped<IToDoItemRepository, ToDoItemRepository>();
 
+builder.Services.AddCorsPolicy(builder.Configuration);
+
 var app = builder.Build();
 
 // Apply any pending migrations on startup
@@ -42,6 +45,8 @@ if (app.Environment.IsDevelopment())
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
+
+app.UseCors(CorsPolicyExtension.CorsPolicyName);
 
 app.AddTaskApi();
 

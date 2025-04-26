@@ -11,11 +11,11 @@ COPY ["TaskMicroservice/TaskMicroservice.csproj", "TaskMicroservice/"]
 RUN dotnet restore "TaskMicroservice/TaskMicroservice.csproj"
 COPY . .
 WORKDIR "/src/TaskMicroservice"
-RUN dotnet build "TaskMicroservice.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./TaskMicroservice.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "TaskMicroservice.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./TaskMicroservice.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
