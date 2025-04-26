@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ToDoBackend.Domain.DTOs;
 using ToDoBackend.Domain.Entities;
 using ToDoBackend.Infrastructure.Repositories.Interfaces;
 
@@ -28,14 +29,6 @@ public class ToDoItemRepository(ToDoItemDbContext context) : IToDoItemRepository
         var existingToDoItem = await context.ToDoItems.FindAsync(toDoItemId);
         if (existingToDoItem != null)
         {
-            if (existingToDoItem.CompletedAt == null)
-            {
-                existingToDoItem.CompletedAt = DateTime.UtcNow;
-            }
-            else
-            {
-                existingToDoItem.CompletedAt = null;
-            }
             await context.SaveChangesAsync();
         }
     }
