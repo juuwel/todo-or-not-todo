@@ -48,7 +48,7 @@ jobs:
           
             # Checkout to the specific tag that triggered this workflow
             echo "🔖 Checking out tag: ${TAG_NAME}"
-            git checkout ${TAG_NAME}
+            git checkout tags/${TAG_NAME}
             echo "✅ Checkout completed"
           
             # Set environment variables for compose.yaml
@@ -59,15 +59,13 @@ jobs:
       
             # Create a temporary environment file with correct URLs for production build
             echo "🔧 Creating Angular environment file for production..."
-            cat > ToDoFrontend/src/environments/environment.production.ts << EOF
-            export const environment = {
-              production: true,
-              taskMsBaseUrl: 'http://${SERVER_HOST}:1000/api/v1/tasks',
-              userMsBaseUrl: 'http://${SERVER_HOST}:1001',
-            };
-            EOF
-            echo "✅ Environment file created with SERVER_HOST: ${SERVER_HOST}"
-      
+            echo 'export const environment = {' > ToDoFrontend/src/environments/environment.production.ts
+            echo '  production: true,' >> ToDoFrontend/src/environments/environment.production.ts
+            echo "  taskMsBaseUrl: 'http://\${SERVER_HOST}:1000/api/v1/tasks'," >> ToDoFrontend/src/environments/environment.production.ts
+            echo "  userMsBaseUrl: 'http://\${SERVER_HOST}:1001'," >> ToDoFrontend/src/environments/environment.production.ts
+            echo '};' >> ToDoFrontend/src/environments/environment.production.ts
+            echo "✅ Environment file created with SERVER_HOST: \${SERVER_HOST}"          
+          
             # Start all services
             echo "🐳 Starting Docker containers..."
             docker compose up -d
