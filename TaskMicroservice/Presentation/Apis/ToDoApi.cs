@@ -74,23 +74,13 @@ public static class ToDoApi
     }
     
     private static async Task<Results<Created<ToDoItem>, Conflict, ProblemHttpResult>> CreateTask(
-        [FromBody] CreateToDoItemDto toDoItemDto, 
+        [FromBody] CreateToDoItemDto createToDoItem, 
         [FromServices] IToDoService toDoService)
     {
         try
         {
-            var toDoItem = new ToDoItem
-            {
-                Id = Guid.NewGuid(),
-                UserId = toDoItemDto.UserId,
-                Title = toDoItemDto.Title,
-                Description = toDoItemDto.Description,
-                CreatedAt = DateTime.UtcNow,
-                CompletedAt = null
-            };
-
-            await toDoService.CreateToDoItemAsync(toDoItem);
-            return TypedResults.Created($"/api/v1/tasks/item/{toDoItem.Id}", toDoItem);
+            var newToDoItem = await toDoService.CreateToDoItemAsync(createToDoItem);
+            return TypedResults.Created($"/api/v1/tasks/item/{newToDoItem.Id}", newToDoItem);
         }
         catch (Exception ex) when (ex.Message == "ToDo item already exists")
         {

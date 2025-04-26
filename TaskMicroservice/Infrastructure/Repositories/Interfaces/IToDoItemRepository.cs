@@ -7,7 +7,7 @@ public interface IToDoItemRepository
 {
     Task CreateToDoItemAsync(ToDoItem toDoItem);
     
-    Task UpdateToDoItemAsync(UpdateToDoItemDto toDoItem);
+    Task UpdateToDoItemAsync(ToDoItem toDoItem);
     
     Task ToggleToDoItemStatusAsync(Guid toDoItemId);
     

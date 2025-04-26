@@ -13,7 +13,7 @@ public class ToDoItemRepository(ToDoItemDbContext context) : IToDoItemRepository
         await context.SaveChangesAsync();
     }
 
-    public async Task UpdateToDoItemAsync(UpdateToDoItemDto toDoItem)
+    public async Task UpdateToDoItemAsync(ToDoItem toDoItem)
     {
         var existingToDoItem = await context.ToDoItems.FindAsync(toDoItem.Id);
         if (existingToDoItem != null)
@@ -29,14 +29,6 @@ public class ToDoItemRepository(ToDoItemDbContext context) : IToDoItemRepository
         var existingToDoItem = await context.ToDoItems.FindAsync(toDoItemId);
         if (existingToDoItem != null)
         {
-            if (existingToDoItem.CompletedAt == null)
-            {
-                existingToDoItem.CompletedAt = DateTime.UtcNow;
-            }
-            else
-            {
-                existingToDoItem.CompletedAt = null;
-            }
             await context.SaveChangesAsync();
         }
     }

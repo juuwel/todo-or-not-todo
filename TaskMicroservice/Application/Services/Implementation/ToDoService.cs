@@ -7,15 +7,21 @@ namespace ToDoBackend.Application.Services.Implementation;
 
 public class ToDoService(IToDoItemRepository toDoItemRepository) : IToDoService
 {
-    public async Task CreateToDoItemAsync(ToDoItem toDoItem)
+    public async Task<ToDoItem> CreateToDoItemAsync(CreateToDoItemDto createtoDoItem)
     {
-        var existingToDoItem = await toDoItemRepository.GetToDoItemByIdAsync(toDoItem.Id);
-        if (existingToDoItem != null)
-        {
-            throw new Exception("ToDo item already exists");
-        }
-        await toDoItemRepository.CreateToDoItemAsync(toDoItem);
         
+        var toDoItem = new ToDoItem
+        {
+            Id = Guid.NewGuid(),
+            UserId = createtoDoItem.UserId,
+            Title = createtoDoItem.Title,
+            Description = createtoDoItem.Description,
+            CreatedAt = DateTime.UtcNow,
+            CompletedAt = null
+        };
+        await toDoItemRepository.CreateToDoItemAsync(toDoItem);
+        return toDoItem;
+
     }
 
     public async Task UpdateToDoItemAsync(UpdateToDoItemDto toDoItem)
@@ -25,13 +31,28 @@ public class ToDoService(IToDoItemRepository toDoItemRepository) : IToDoService
         {
             throw new Exception("ToDo item not found");
         }
-        await toDoItemRepository.UpdateToDoItemAsync(toDoItem);
+        
+        existingToDoItem.Title = toDoItem.Title;
+        existingToDoItem.Description = toDoItem.Description;
+        
+        await toDoItemRepository.UpdateToDoItemAsync(existingToDoItem);
     }
 
     public async Task UpdateToDoItemStatusAsync(Guid toDoItemId)
     {
         var existingToDoItem = await toDoItemRepository.GetToDoItemByIdAsync(toDoItemId);
-        if (existingToDoItem == null)
+        if (existingToDoItem != null)
+        {
+            if (existingToDoItem.CompletedAt == null)
+            {
+                existingToDoItem.CompletedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                existingToDoItem.CompletedAt = null;
+            }
+        }
+        else
         {
             throw new Exception("ToDo item not found");
         }
