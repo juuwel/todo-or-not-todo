@@ -14,4 +14,6 @@ export interface CreateTaskItemDto {
   description: string;
 }
 
-
+export interface UpdateTaskItemDto extends CreateTaskItemDto {
+  id: uuid;
+}

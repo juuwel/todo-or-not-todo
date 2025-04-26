@@ -1,10 +1,12 @@
-<div *ngIf="appMessageStore.message$ | async as message"
-     class="p-4 rounded-lg"
-     [ngClass]="{
-       'bg-red-200': appMessageStore.getMessageType()! === 'error',
-       'bg-blue-200': appMessageStore.getMessageType()! === 'info',
-       'bg-yellow-200': appMessageStore.getMessageType()! === 'warning'
-     }"
->
+<div *ngIf="appMessageStore.message$ | async as message" class="p-4 rounded-lg flex justify-between items-center"
+  [ngClass]="{
+       'bg-error': appMessageStore.getMessageType()! === 'error',
+       'bg-info': appMessageStore.getMessageType()! === 'info',
+       'bg-warning': appMessageStore.getMessageType()! === 'warning',
+        'bg-success': appMessageStore.getMessageType()! === 'success'
+     }">
   <p>{{ message }}</p>
+  <button class="ml-4" (click)="appMessageStore.clearMessage()">
+    <span class="material-icons">close</span>
+  </button>
 </div>

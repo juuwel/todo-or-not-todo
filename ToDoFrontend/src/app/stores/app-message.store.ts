@@ -1,6 +1,6 @@
-import {Injectable} from '@angular/core';
-import {BehaviorSubject, filter, Observable} from 'rxjs';
-import {MessageTypes} from '../datamodel/message.types';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, filter, Observable } from 'rxjs';
+import { MessageTypes } from '../datamodel/message.types';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +15,11 @@ export class AppMessageStore {
       filter((message): message is string => message !== null)
     );
   }
+
+  public get message(): string | null {
+    return this.messageSubject.getValue();
+  }
+
 
   // Update the message value
   public setMessage(message: string, messageType: MessageTypes): void {
