@@ -22,7 +22,7 @@
       - Jwt__Issuer=https://to-do-or-not.todo
       - Jwt__Audience=to-do-or-not.todo
       - Jwt__ExpirationMinutes=1440
-      - AllowedOrigins=http://localhost:3000,${SERVER_HOST}:3000
+      - AllowedOrigins=http://localhost:3000,http://${SERVER_HOST}:3000
     depends_on:
       - unleash
       - postgres-task
@@ -64,7 +64,7 @@
       - Jwt__Issuer=https://to-do-or-not.todo
       - Jwt__Audience=to-do-or-not.todo
       - Jwt__ExpirationMinutes=1440
-      - AllowedOrigins=http://localhost:3000,${SERVER_HOST}:3000
+      - AllowedOrigins=http://localhost:3000,http://${SERVER_HOST}:3000
     ports:
       - "1001:8080"
     networks:
