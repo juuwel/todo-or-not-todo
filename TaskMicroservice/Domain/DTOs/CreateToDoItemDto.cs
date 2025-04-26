@@ -1,11 +1,12 @@
-﻿namespace ToDoBackend.Domain.DTOs;
-// DTO for creating a ToDoItem
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ToDoBackend.Domain.DTOs;
+
 public class CreateToDoItemDto
 {
-    public required Guid UserId { get; set; }
-    
+    [MaxLength(64)]
     public required string Title { get; set; }
     
+    [MaxLength(128)]
     public required string Description { get; set; }
-    
 }

@@ -5,13 +5,11 @@ namespace ToDoBackend.Infrastructure.Repositories.Interfaces;
 
 public interface IToDoItemRepository
 {
-    Task CreateToDoItemAsync(ToDoItem toDoItem);
+    Task<ToDoItem> CreateToDoItemAsync(ToDoItem toDoItem);
     
-    Task UpdateToDoItemAsync(ToDoItem toDoItem);
+    Task<ToDoItem> UpdateToDoItemAsync(ToDoItem toDoItem);
     
-    Task ToggleToDoItemStatusAsync(Guid toDoItemId);
-    
-    Task DeleteToDoItemAsync(Guid toDoItemId);
+    Task DeleteToDoItemAsync(ToDoItem toDoItem);
     
     Task<List<ToDoItem>> GetToDoItemsByUserIdAsync(Guid userId);
     

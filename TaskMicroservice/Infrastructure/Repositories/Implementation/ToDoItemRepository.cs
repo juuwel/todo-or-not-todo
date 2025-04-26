@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ToDoBackend.Domain.DTOs;
 using ToDoBackend.Domain.Entities;
 using ToDoBackend.Infrastructure.Repositories.Interfaces;
 
@@ -7,40 +6,24 @@ namespace ToDoBackend.Infrastructure.Repositories.Implementation;
 
 public class ToDoItemRepository(ToDoItemDbContext context) : IToDoItemRepository
 {
-    public async Task CreateToDoItemAsync(ToDoItem toDoItem)
+    public async Task<ToDoItem> CreateToDoItemAsync(ToDoItem toDoItem)
     {
         var result = await context.ToDoItems.AddAsync(toDoItem);
         await context.SaveChangesAsync();
+        return result.Entity;
     }
 
-    public async Task UpdateToDoItemAsync(ToDoItem toDoItem)
+    public async Task<ToDoItem> UpdateToDoItemAsync(ToDoItem toDoItem)
     {
-        var existingToDoItem = await context.ToDoItems.FindAsync(toDoItem.Id);
-        if (existingToDoItem != null)
-        {
-            existingToDoItem.Title = toDoItem.Title;
-            existingToDoItem.Description = toDoItem.Description;
-            await context.SaveChangesAsync();
-        }
+        var result = context.ToDoItems.Update(toDoItem);
+        await context.SaveChangesAsync();
+        return result.Entity;
     }
 
-    public async Task ToggleToDoItemStatusAsync(Guid toDoItemId)
+    public async Task DeleteToDoItemAsync(ToDoItem toDoItem)
     {
-        var existingToDoItem = await context.ToDoItems.FindAsync(toDoItemId);
-        if (existingToDoItem != null)
-        {
-            await context.SaveChangesAsync();
-        }
-    }
-
-    public async Task DeleteToDoItemAsync(Guid toDoItemId)
-    {
-        var existingToDoItem = await context.ToDoItems.FindAsync(toDoItemId);
-        if (existingToDoItem != null)
-        {
-            context.ToDoItems.Remove(existingToDoItem);
-            await context.SaveChangesAsync();
-        }
+        context.ToDoItems.Remove(toDoItem);
+        await context.SaveChangesAsync();
     }
 
     public async Task<List<ToDoItem>> GetToDoItemsByUserIdAsync(Guid userId)

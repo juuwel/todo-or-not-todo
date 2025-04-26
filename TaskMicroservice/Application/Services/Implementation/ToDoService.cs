@@ -1,87 +1,105 @@
-﻿using ToDoBackend.Application.Services.Interfaces;
+using System.Security.Claims;
+using Shared.Exceptions;
+using ToDoBackend.Application.Services.Interfaces;
 using ToDoBackend.Domain.DTOs;
 using ToDoBackend.Domain.Entities;
 using ToDoBackend.Infrastructure.Repositories.Interfaces;
 
 namespace ToDoBackend.Application.Services.Implementation;
 
-public class ToDoService(IToDoItemRepository toDoItemRepository) : IToDoService
+public class ToDoService(IToDoItemRepository toDoItemRepository, IHttpContextAccessor httpContextAccessor) : IToDoService
 {
-    public async Task<ToDoItem> CreateToDoItemAsync(CreateToDoItemDto createtoDoItem)
+    public async Task<ToDoItemDto> CreateToDoItemAsync(CreateToDoItemDto createToDoItemDto)
     {
+        var userId = UnpackUserId();
         
         var toDoItem = new ToDoItem
         {
             Id = Guid.NewGuid(),
-            UserId = createtoDoItem.UserId,
-            Title = createtoDoItem.Title,
-            Description = createtoDoItem.Description,
-            CreatedAt = DateTime.UtcNow,
-            CompletedAt = null
+            UserId = userId,
+            Title = createToDoItemDto.Title,
+            Description = createToDoItemDto.Description,
+            CreatedAt = DateTime.UtcNow
         };
-        await toDoItemRepository.CreateToDoItemAsync(toDoItem);
-        return toDoItem;
-
+        
+        var result = await toDoItemRepository.CreateToDoItemAsync(toDoItem);
+        return result.ToDto();
     }
 
-    public async Task UpdateToDoItemAsync(UpdateToDoItemDto toDoItem)
+    public async Task<ToDoItemDto> UpdateToDoItemAsync(UpdateToDoItemDto updateToDoItem)
     {
-        var existingToDoItem = await toDoItemRepository.GetToDoItemByIdAsync(toDoItem.Id);
-        if (existingToDoItem == null)
-        {
-            throw new Exception("ToDo item not found");
-        }
-        
-        existingToDoItem.Title = toDoItem.Title;
-        existingToDoItem.Description = toDoItem.Description;
-        
-        await toDoItemRepository.UpdateToDoItemAsync(existingToDoItem);
+        var existingToDoItem = await CheckForNullAndUserAuthorization(updateToDoItem.Id);
+        existingToDoItem.Title = updateToDoItem.Title;
+        existingToDoItem.Description = updateToDoItem.Description;
+        var result = await toDoItemRepository.UpdateToDoItemAsync(existingToDoItem);
+        return result.ToDto();
     }
 
-    public async Task UpdateToDoItemStatusAsync(Guid toDoItemId)
+    public async Task<ToDoItemDto> UpdateToDoItemStatusAsync(Guid toDoItemId)
     {
-        var existingToDoItem = await toDoItemRepository.GetToDoItemByIdAsync(toDoItemId);
-        if (existingToDoItem != null)
+        var existingToDoItem = await CheckForNullAndUserAuthorization(toDoItemId);
+        if (existingToDoItem.CompletedAt == null)
         {
-            if (existingToDoItem.CompletedAt == null)
-            {
-                existingToDoItem.CompletedAt = DateTime.UtcNow;
-            }
-            else
-            {
-                existingToDoItem.CompletedAt = null;
-            }
+            existingToDoItem.CompletedAt = DateTime.UtcNow;
         }
         else
         {
-            throw new Exception("ToDo item not found");
+            existingToDoItem.CompletedAt = null;
         }
-        await toDoItemRepository.ToggleToDoItemStatusAsync(toDoItemId);
+        
+        var result = await toDoItemRepository.UpdateToDoItemAsync(existingToDoItem);
+        return result.ToDto();
     }
 
     public async Task DeleteToDoItemAsync(Guid toDoItemId)
     {
+        var existingToDoItem = await CheckForNullAndUserAuthorization(toDoItemId);
+        await toDoItemRepository.DeleteToDoItemAsync(existingToDoItem);
+    }
+
+    public async Task<List<ToDoItemDto>> GetToDoItemsByUserIdAsync()
+    {
+        var userId = UnpackUserId();
+        var toDoItems = await toDoItemRepository.GetToDoItemsByUserIdAsync(userId);
+        return toDoItems.Select(x => x.ToDto()).ToList();
+    }
+
+    public async Task<ToDoItemDto?> GetToDoItemByIdAsync(Guid toDoItemId)
+    {
+        var toDoItem = await CheckForNullAndUserAuthorization(toDoItemId);
+        return toDoItem.ToDto();
+    }
+    
+    private Guid UnpackUserId()
+    {
+        var userIdClaim = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+        {
+            throw new ActionUnauthorizedException("User ID claim not found.");
+        }
+
+        if (Guid.TryParse(userIdClaim.Value, out var userId))
+        {
+            return userId;
+        }
+
+        throw new ActionUnauthorizedException("User ID claim is not a valid GUID.");
+    }
+    
+    private async Task<ToDoItem> CheckForNullAndUserAuthorization(Guid toDoItemId)
+    {
+        var userId = UnpackUserId();
         var existingToDoItem = await toDoItemRepository.GetToDoItemByIdAsync(toDoItemId);
         if (existingToDoItem == null)
         {
-            throw new Exception("ToDo item not found");
+            throw new NotFoundException("ToDo item not found");
         }
-        await toDoItemRepository.DeleteToDoItemAsync(toDoItemId);
-    }
 
-    public async Task<List<ToDoItem>> GetToDoItemsByUserIdAsync(Guid userId)
-    {
-        var toDoItems = await toDoItemRepository.GetToDoItemsByUserIdAsync(userId);
-        return toDoItems.ToList();
-    }
-
-    public async Task<ToDoItem?> GetToDoItemByIdAsync(Guid toDoItemId)
-    {
-        var toDoItem = await toDoItemRepository.GetToDoItemByIdAsync(toDoItemId);
-        if (toDoItem == null)
+        if (existingToDoItem.UserId != userId)
         {
-            throw new Exception("ToDo item not found");
+            throw new ActionUnauthorizedException("You are not authorized to perform this action.");
         }
-        return toDoItem;
+        
+        return existingToDoItem;
     }
 }

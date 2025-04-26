@@ -5,15 +5,15 @@ namespace ToDoBackend.Application.Services.Interfaces;
 
 public interface IToDoService
 {
-    Task<ToDoItem> CreateToDoItemAsync(CreateToDoItemDto toDoItem);
+    Task<ToDoItemDto> CreateToDoItemAsync(CreateToDoItemDto createToDoItem);
     
-    Task UpdateToDoItemAsync(UpdateToDoItemDto toDoItem);
+    Task<ToDoItemDto> UpdateToDoItemAsync(UpdateToDoItemDto updateToDoItem);
     
-    Task UpdateToDoItemStatusAsync(Guid toDoItemId);
+    Task<ToDoItemDto> UpdateToDoItemStatusAsync(Guid toDoItemId);
     
     Task DeleteToDoItemAsync(Guid toDoItemId);
     
-    Task<List<ToDoItem>> GetToDoItemsByUserIdAsync(Guid userId);
+    Task<List<ToDoItemDto>> GetToDoItemsByUserIdAsync();
     
-    Task<ToDoItem?> GetToDoItemByIdAsync(Guid toDoItemId);
+    Task<ToDoItemDto?> GetToDoItemByIdAsync(Guid toDoItemId);
 }
