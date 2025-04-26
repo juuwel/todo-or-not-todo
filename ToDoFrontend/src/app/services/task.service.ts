@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../environments/environment';
 import { CreateTaskItemDto, TaskItemDto, UpdateTaskItemDto, uuid } from '../datamodel/task.types';
 import { AppMessageStore } from '../stores/app-message.store';
 import { TaskStore } from '../stores/task.store';
@@ -8,8 +9,7 @@ import { TaskStore } from '../stores/task.store';
   providedIn: 'root'
 })
 export class TaskService {
-  private readonly baseUrl = 'http://localhost:1000/api/v1';
-  private readonly taskBaseUrl = this.baseUrl + "/tasks";
+  private readonly baseUrl = environment.taskMsBaseUrl;
 
   constructor(
     private httpClient: HttpClient,
@@ -18,13 +18,13 @@ export class TaskService {
   ) { }
 
   public async getAllTasks() {
-    this.httpClient.get<TaskItemDto[]>(this.taskBaseUrl).subscribe(tasks => {
+    this.httpClient.get<TaskItemDto[]>(this.baseUrl).subscribe(tasks => {
       this.taskStore.tasks$ = tasks;
     });
   }
 
   public async toggleTaskStatus(taskId: uuid): Promise<void> {
-    this.httpClient.patch<TaskItemDto>(`${this.taskBaseUrl}/status/${taskId}`, {}).subscribe(
+    this.httpClient.patch<TaskItemDto>(`${this.baseUrl}/status/${taskId}`, {}).subscribe(
       {
         next: (updatedTask) => {
           const index = this.taskStore.tasks.findIndex(task => task.id === updatedTask.id);
@@ -43,7 +43,7 @@ export class TaskService {
   }
 
   public async deleteTask(taskId: uuid): Promise<void> {
-    this.httpClient.delete<void>(`${this.taskBaseUrl}/${taskId}`)
+    this.httpClient.delete<void>(`${this.baseUrl}/${taskId}`)
       .subscribe(
         {
           next: () => {
@@ -58,7 +58,7 @@ export class TaskService {
   }
 
   public async createTask(createTaskItemDto: CreateTaskItemDto): Promise<void> {
-    this.httpClient.post<TaskItemDto>(this.taskBaseUrl, createTaskItemDto)
+    this.httpClient.post<TaskItemDto>(this.baseUrl, createTaskItemDto)
       .subscribe(
         {
           next: (createdTask) => {
@@ -74,7 +74,7 @@ export class TaskService {
   }
 
   public async updateTask(updateTaskItemDto: UpdateTaskItemDto): Promise<void> {
-    this.httpClient.put<TaskItemDto>(`${this.taskBaseUrl}`, updateTaskItemDto)
+    this.httpClient.put<TaskItemDto>(`${this.baseUrl}`, updateTaskItemDto)
       .subscribe(
         {
           next: (updatedTask) => {

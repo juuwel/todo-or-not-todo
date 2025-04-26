@@ -5,7 +5,9 @@
       - "8080:8080"
     volumes:
       - ./docs:/usr/local/structurizr
-  
+    networks:
+      - todo-app-network
+
   task-ms:
     image: task-ms
     build:
@@ -20,9 +22,12 @@
       - Jwt__Issuer=https://to-do-or-not.todo
       - Jwt__Audience=to-do-or-not.todo
       - Jwt__ExpirationMinutes=1440
+      - AllowedOrigins=http://localhost:3000
     depends_on:
       - unleash
       - postgres-task
+    networks:
+      - todo-app-network
 
   postgres-task:
     image: postgres:latest
@@ -39,7 +44,9 @@
       interval: 10s
       timeout: 5s
       retries: 5
-   
+    networks:
+      - todo-app-network
+
   user-ms:
     image: user-ms
     build:
@@ -57,9 +64,12 @@
       - Jwt__Issuer=https://to-do-or-not.todo
       - Jwt__Audience=to-do-or-not.todo
       - Jwt__ExpirationMinutes=1440
+      - AllowedOrigins=http://localhost:3000
     ports:
-      - "1001:8080"    
-      
+      - "1001:8080"
+    networks:
+      - todo-app-network
+
   postgres-user:
     image: postgres:latest
     environment:
@@ -75,8 +85,9 @@
       interval: 10s
       timeout: 5s
       retries: 5
-  
-  # Unleash Server (Feature Flag Management)
+    networks:
+      - todo-app-network
+
   unleash-db:
     image: postgres:latest
     environment:
@@ -90,6 +101,8 @@
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - todo-app-network
 
   unleash:
     image: unleashorg/unleash-server
@@ -106,8 +119,27 @@
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - todo-app-network
+
+  frontend:
+    image: todo-frontend
+    build:
+      context: ToDoFrontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - task-ms
+      - user-ms
+    networks:
+      - todo-app-network
 
 volumes:
   postgres-task-data:
   postgres-user-data:
   unleash-db-data:
+
+networks:
+  todo-app-network:
+    driver: bridge
