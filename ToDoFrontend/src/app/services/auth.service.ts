@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
+import { environment } from '../../environments/environment';
 import { AppConstants } from '../appConstants';
 import { AuthResponse, ProblemDetails } from '../datamodel/api-response.types';
 import { AuthStore } from '../stores/auth.store';
@@ -10,7 +11,7 @@ import { AuthStore } from '../stores/auth.store';
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly baseUrl = 'http://localhost:1001';
+  private readonly baseUrl = environment.userMsBaseUrl;
   private readonly authBaseUrl = this.baseUrl + "/auth";
   private readonly featureFlagBaseUrl = this.baseUrl + "/featureFlag/isEnabled";
 

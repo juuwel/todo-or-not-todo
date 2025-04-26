@@ -35,8 +35,8 @@ export class TaskCardComponent implements OnInit {
     private fb: FormBuilder,
   ) {
     this.taskForm = this.fb.group({
-      title: ['', Validators.required],
-      description: [''],
+      title: ['', [Validators.required, Validators.maxLength(64)]],
+      description: ['', Validators.maxLength(128)],
     });
   }
 
@@ -83,6 +83,8 @@ export class TaskCardComponent implements OnInit {
       };
       this.taskUpdatedEmitter.emit(updatedTask);
     }
+
+    this.taskForm.reset();
   }
 
   protected onDeleteClicked(): void {

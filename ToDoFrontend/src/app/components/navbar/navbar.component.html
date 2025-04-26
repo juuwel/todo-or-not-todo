@@ -1,15 +1,21 @@
-<nav class="flex items-center justify-between px-4 py-2 bg-gray-100">
+<nav class="flex items-center justify-between px-4 py-3 bg-background_accent">
   <div class="flex-1"></div>
   <h1 class="text-center text-lg font-bold flex-1 hover:cursor-pointer" [routerLink]="HomeRoute">To Do or Not To Do</h1>
 
   <div class="flex flex-1 justify-end">
     @if (authStore.isLoggedIn$ | async) {
-    <button class="bg-primary px-3 py-1 rounded-md" (click)="logOut()">
-      Log Out
+    <button
+      class="flex justify-between items-center bg-primary px-3 py-1 gap-1 rounded-lg font-semibold hover:brightness-90"
+      (click)="logOut()">
+      <span>Log Out</span>
+      <span class="material-icons">logout</span>
     </button>
     } @else {
-    <button class="bg-primary px-3 py-1 rounded-md" [routerLink]="LogInRoute">
-      Log In
+    <button
+      class="flex justify-between items-center bg-primary px-3 py-1 gap-1 rounded-lg font-semibold hover:brightness-90"
+      [routerLink]="LogInRoute">
+      <span>Log In</span>
+      <span class="material-icons">login</span>
     </button>
     }
   </div>

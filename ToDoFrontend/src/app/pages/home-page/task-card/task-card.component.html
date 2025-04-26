@@ -8,14 +8,35 @@
 
     <app-icon-button iconName="close" class="self-end" (clickEvent)="cancelAddingTask()" />
 
-    <input formControlName="title" class="w-full rounded-sm p-3" placeholder="Title"
-      [style.background-color]="inputColor">
-    <textarea formControlName="description" class="w-full rounded-sm flex-grow p-3" placeholder="Description"
-      [style.background-color]="inputColor">
-            </textarea>
+    <input formControlName="title" class="w-full rounded-sm p-3" [ngClass]="{
+      'ring-error ring-2': taskForm.get('title')?.invalid && taskForm.get('title')?.touched
+    }" placeholder="Title" [style.background-color]="inputColor">
 
-    <button class="rounded-md disabled:opacity-25" [disabled]="taskForm.invalid" [style.background-color]="buttonColor"
-      (click)="onSaveClicked()">
+    @if ( taskForm.get('title')?.invalid && taskForm.get('title')?.touched) {
+    <div class="text-error text-sm">
+      @if (taskForm.get('title')?.errors?.['required']) {
+      <span>Title is required</span>
+      } @else if (taskForm.get('title')?.errors?.['maxlength']) {
+      <span>Title must be at most {{ taskForm.get('title')?.errors?.['maxlength'].requiredLength }} characters
+        long</span>
+      }
+    </div>
+    }
+
+    <textarea formControlName="description" class="w-full rounded-sm flex-grow-[6] p-3" placeholder="Description"
+      [style.background-color]="inputColor" [ngClass]="{
+        'ring-error ring-2': taskForm.get('description')?.invalid && taskForm.get('description')?.touched
+      }">
+    </textarea>
+
+    @if (taskForm.get('description')?.invalid && taskForm.get('description')?.touched) {
+    <span class="text-error text-sm">Description must be at most {{
+      taskForm.get('description')?.errors?.['maxlength'].requiredLength }} characters
+      long</span>
+    }
+
+    <button class="rounded-md disabled:opacity-25 flex-grow-[1]" [disabled]="taskForm.invalid"
+      [style.background-color]="buttonColor" (click)="onSaveClicked()">
       Add
     </button>
   </form>
