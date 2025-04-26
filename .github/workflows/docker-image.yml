@@ -14,7 +14,7 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          
+
       - name: Add remote server to known_hosts
         run: |
           ssh-keyscan ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
@@ -23,28 +23,42 @@ jobs:
         run: |
           # Extract tag name that triggered the workflow
           TAG_NAME=${GITHUB_REF#refs/tags/}
-
+          echo "🚀 Deploying tag: ${TAG_NAME}"
+      
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'ENDSSH'
+            echo "📥 Connected to server: $(hostname)"
+          
             # Check if todo-or-not-todo directory exists, if not clone it
             if [ ! -d ~/todo-or-not-todo ]; then
-              echo "Directory not found. Cloning repository..."
+              echo "📁 Directory not found. Cloning repository..."
               git clone ${{ github.server_url }}/${{ github.repository }}.git ~/todo-or-not-todo
+              echo "✅ Repository cloned successfully"
+            else
+              echo "📂 Repository directory already exists"
             fi
-
+      
             # Navigate to project directory
             cd ~/todo-or-not-todo
-
+            echo "📍 Working in directory: $(pwd)"
+      
             # Pull latest code
+            echo "⬇️ Fetching latest code and tags..."
             git fetch --all --tags
+            echo "✅ Fetch completed"
           
             # Checkout to the specific tag that triggered this workflow
+            echo "🔖 Checking out tag: ${TAG_NAME}"
             git checkout ${TAG_NAME}
+            echo "✅ Checkout completed"
           
             # Set environment variables for compose.yaml
+            echo "🔐 Setting environment variables for docker-compose"
             export UNLEASH_API_TOKEN="${{ secrets.UNLEASH_API_TOKEN }}"
             export SERVER_HOST="${{secrets.SERVER_HOST}}"
-
+            echo "✅ Environment variables set"
+      
             # Create a temporary environment file with correct URLs for production build
+            echo "🔧 Creating Angular environment file for production..."
             cat > ToDoFrontend/src/environments/environment.production.ts << EOF
             export const environment = {
               production: true,
@@ -52,10 +66,16 @@ jobs:
               userMsBaseUrl: 'http://${SERVER_HOST}:1001',
             };
             EOF
-
+            echo "✅ Environment file created with SERVER_HOST: ${SERVER_HOST}"
+      
             # Start all services
+            echo "🐳 Starting Docker containers..."
             docker compose up -d
-
+            echo "✅ Containers started successfully"
+          
+            # Show running containers
+            echo "📊 Current running containers:"
+            docker ps
           ENDSSH
-
-
+          
+          echo "🎉 Deployment completed successfully!"
