@@ -12,6 +12,7 @@ public static class CorsPolicyExtension
         {
             options.AddPolicy("CorsPolicy", builder =>
             {
+                Console.WriteLine(configuration["AllowedOrigins"]);
                 builder
                     .WithOrigins(configuration["AllowedOrigins"]?.Split(",")  ?? [DefaultAllowedOrigins])
                     .AllowAnyMethod()
