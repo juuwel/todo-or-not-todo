@@ -45,7 +45,7 @@ jobs:
             export SERVER_HOST="${{secrets.SERVER_HOST}}"
 
             # Create a temporary environment file with correct URLs for production build
-            cat > src/environments/environment.production.ts << EOF
+            cat > ToDoFrontend/src/environments/environment.production.ts << EOF
             export const environment = {
               production: true,
               taskMsBaseUrl: 'http://${SERVER_HOST}:1000/api/v1/tasks',
