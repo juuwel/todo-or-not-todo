@@ -17,9 +17,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get current date
+      - name: Get current date and time
         id: date
-        run: echo "date=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
+        run: echo "date=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_OUTPUT
 
       - name: Create and push tag
         run: |
