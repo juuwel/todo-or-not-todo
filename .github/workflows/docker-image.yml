@@ -14,29 +14,67 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          
+
       - name: Add remote server to known_hosts
         run: |
           ssh-keyscan ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
           
       - name: Deploy to server
         run: |
+          # Extract tag name that triggered the workflow
+          TAG_NAME=${{ github.ref_name }}
+          echo "🚀 Deploying tag: ${TAG_NAME}"
+      
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'ENDSSH'
+            echo "📥 Connected to server: $(hostname)"
+          
             # Check if todo-or-not-todo directory exists, if not clone it
             if [ ! -d ~/todo-or-not-todo ]; then
-              echo "Directory not found. Cloning repository..."
+              echo "📁 Directory not found. Cloning repository..."
               git clone ${{ github.server_url }}/${{ github.repository }}.git ~/todo-or-not-todo
+              echo "✅ Repository cloned successfully"
+            else
+              echo "📂 Repository directory already exists"
             fi
-
+      
             # Navigate to project directory
             cd ~/todo-or-not-todo
-
+            echo "📍 Working in directory: $(pwd)"
+      
             # Pull latest code
-            git pull
+            echo "⬇️ Fetching latest code and tags..."
+            git fetch --all --tags
+            echo "✅ Fetch completed"
+          
+            # Checkout to the specific tag that triggered this workflow
+            echo "🔖 Checking out tag: ${{ github.ref_name }}"
+            git checkout tags/${{ github.ref_name }}
+            echo "✅ Checkout completed"
+          
+            # Set environment variables for compose.yaml
+            echo "🔐 Setting environment variables for docker-compose"
+            export UNLEASH_API_TOKEN="${{ secrets.UNLEASH_API_TOKEN }}"
+            export SERVER_HOST="${{ secrets.SERVER_HOST }}"
+            echo "✅ Environment variables set"
+          
+            # Create a .env file for docker-compose
+            echo "UNLEASH_API_TOKEN=${{ secrets.UNLEASH_API_TOKEN }}" > .env
+            echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> .env
+            echo "✅ Environment variables set and .env file created"
+          
+            # Create a temporary environment file with correct URLs for production build
+            echo "🔧 Creating Angular environment file for production..."
+            echo 'export const environment = {' > ToDoFrontend/src/environments/environment.production.ts
+            echo '  production: true,' >> ToDoFrontend/src/environments/environment.production.ts
+            echo "  taskMsBaseUrl: 'http://${{secrets.SERVER_HOST}}:1000/api/v1/tasks'," >> ToDoFrontend/src/environments/environment.production.ts
+            echo "  userMsBaseUrl: 'http://${{secrets.SERVER_HOST}}:1001'," >> ToDoFrontend/src/environments/environment.production.ts
+            echo '};' >> ToDoFrontend/src/environments/environment.production.ts
+            echo "✅ Environment file created with SERVER_HOST: ${{secrets.SERVER_HOST_TEST}}"          
           
             # Start all services
-            docker compose up -d
-
+            echo "🐳 Starting Docker containers..."
+            docker compose up -d --build frontend task-ms user-ms
+            echo "✅ Containers started successfully"
           ENDSSH
-
-
+          
+          echo "🎉 Deployment completed successfully!"
