@@ -1,0 +1,136 @@
+﻿services:
+  structurizr:
+    image: structurizr/lite
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./docs:/usr/local/structurizr
+    networks:
+      - todo-app-network-prod
+
+  task-ms:
+    image: task-ms
+    ports:
+      - "1000:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres-task;Database=todoapp;Username=postgres;Password=postgres
+      - ASPNETCORE_ENVIRONMENT=development
+      - Jwt__Key=e4c88641c473e0848a49431c9dafb5462efb3372dadd0403b3b60b8149cc9384
+      - Jwt__Issuer=https://to-do-or-not.todo
+      - Jwt__Audience=to-do-or-not.todo
+      - Jwt__ExpirationMinutes=1440
+      - AllowedOrigins=http://localhost:3000,http://${SERVER_HOST}:3000
+      - WAIT_HOSTS=postgres-task:5432
+    networks:
+      - todo-app-network-prod
+    deploy:
+      restart_policy:
+        condition: on-failure
+      mode: replicated
+      replicas: 2
+
+  postgres-task:
+    image: postgres:latest
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=todoapp
+    ports:
+      - "5433:5432" # Different host port to avoid conflict
+    volumes:
+      - postgres-task-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - todo-app-network-prod
+
+  user-ms:
+    image: user-ms
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres-user;Database=ToDoOrNotToDo;Username=ToDoOrNotToDo;Password=password
+      - Unleash__ApiUrl=http://unleash:4242/api/
+      - Unleash__ApiToken=${UNLEASH_API_TOKEN:-*:production.token}
+      - ASPNETCORE_ENVIRONMENT=development
+      - Jwt__Key=e4c88641c473e0848a49431c9dafb5462efb3372dadd0403b3b60b8149cc9384
+      - Jwt__Issuer=https://to-do-or-not.todo
+      - Jwt__Audience=to-do-or-not.todo
+      - Jwt__ExpirationMinutes=1440
+      - AllowedOrigins=http://localhost:3000,http://${SERVER_HOST}:3000
+      - WAIT_HOSTS=postgres-user:5432,unleash:4242
+    ports:
+      - "1001:8080"
+    networks:
+      - todo-app-network-prod
+    deploy:
+      restart_policy:
+        condition: on-failure
+      mode: replicated
+      replicas: 2
+
+  postgres-user:
+    image: postgres:latest
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=ToDoOrNotToDo
+      - POSTGRES_DB=ToDoOrNotToDo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-user-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ToDoOrNotToDo" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - todo-app-network-prod
+
+  unleash-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: unleash
+      POSTGRES_USER: unleash
+      POSTGRES_DB: unleash
+    volumes:
+      - unleash-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U unleash" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - todo-app-network-prod
+
+  unleash:
+    image: unleashorg/unleash-server
+    ports:
+      - "4242:4242"
+    environment:
+      DATABASE_URL: postgres://unleash:unleash@unleash-db/unleash
+      DATABASE_SSL: "false"
+      UNLEASH_URL: http://localhost:4242
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:4242/health || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s # Delay before health checks start (to let the database initialize)
+    networks:
+      - todo-app-network-prod
+
+  frontend:
+    image: todo-frontend
+    ports:
+      - "3000:80"
+
+volumes:
+  postgres-task-data:
+  postgres-user-data:
+  unleash-db-data:
+
+networks:
+  todo-app-network-prod:
+    driver: overlay

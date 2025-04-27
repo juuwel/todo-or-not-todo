@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_run:
+    workflows:
+      - Create Tag on Merge
+    types:
+      - completed
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -71,9 +77,14 @@ jobs:
             echo '};' >> ToDoFrontend/src/environments/environment.production.ts
             echo "✅ Environment file created with SERVER_HOST: ${{secrets.SERVER_HOST_TEST}}"          
           
+            # Build the Docker images
+            echo "🐳 Building Docker images..."
+            docker compose build frontend task-ms user-ms
+            echo "✅ Docker images built successfully"
+          
             # Start all services
             echo "🐳 Starting Docker containers..."
-            docker compose up -d --build frontend task-ms user-ms
+            docker stack deploy -c docker-swarm.yaml todo-or-not-todo
             echo "✅ Containers started successfully"
           ENDSSH
           
