@@ -1,23 +1,40 @@
-name: Build and Push Docker Services
+name: Tag, Build and Push Docker Services
 
 on:
   push:
-    tags:
-      - 'v*'
-  workflow_run:
-    workflows:
-      - Create Tag on Merge
-    types:
-      - completed
+    branches:
+      - main
   workflow_dispatch:
 
+permissions:
+  packages: write
+  contents: read
+
 jobs:
-  build-images:
-    name: Build Docker Images
+  create-tag:
+    name: Create Tag
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get current date and time
+        id: date
+        run: echo "date=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_OUTPUT
+
+      - name: Create and push tag
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          tag_name="v${{ steps.date.outputs.date }}"
+          git tag $tag_name
+          git push origin $tag_name
+          echo "::set-output name=tag_name::$tag_name"
+  
+  build-images:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -29,10 +46,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
         
-      - name: Set GIT_TAG
-        if: ${{ github.event_name == 'workflow_run' }}
-        run: echo "GIT_TAG=${{ github.event.workflow_run.event.ref }}" >> $GITHUB_ENV
-        
       - name: Install Docker Compose
         run: |
           sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -40,6 +53,8 @@ jobs:
           docker-compose --version
         
       - name: Build and tag images
+        env:
+          GIT_TAG: ${{ needs.create-tag.outputs.tag_name }}
         run: |
           docker-compose -f compose-prod.yaml build --build-arg GIT_TAG=${{ env.GIT_TAG }}
           for service in task-ms user-ms todo-frontend; do
