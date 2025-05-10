@@ -39,9 +39,10 @@ jobs:
     name: Build and Push Docker Images
     runs-on: ubuntu-latest
     needs: create-tag
-    env:
-      GIT_TAG: ${{ needs.create-tag.outputs.tag_name }}
     steps:
+      env:
+        GIT_TAG: ${{ needs.create-tag.outputs.tag_name }}
+        
       - name: Checkout repository
         uses: actions/checkout@v2
 
