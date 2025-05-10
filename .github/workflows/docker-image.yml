@@ -33,6 +33,9 @@ jobs:
         id: vars
         run: echo "COMMIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
         
+      - name: Set GIT_TAG
+        run: echo "GIT_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+        
       - name: Install Docker Compose
         run: |
           sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -41,7 +44,7 @@ jobs:
         
       - name: Build and tag images
         run: |
-          docker-compose -f compose-prod.yaml build --build-arg GIT_TAG=${{ github.ref_name }}
+          docker-compose -f compose-prod.yaml build --build-arg GIT_TAG=${{ env.GIT_TAG }}
           for service in task-ms user-ms todo-frontend; do
             docker tag ghcr.io/${{ github.repository }}/todo-app-$service:${{ github.ref_name }} ghcr.io/${{ github.repository }}/todo-app-$service:${{ env.COMMIT_SHA }}
             docker tag ghcr.io/${{ github.repository }}/todo-app-$service:${{ github.ref_name }} ghcr.io/${{ github.repository }}/todo-app-$service:latest
