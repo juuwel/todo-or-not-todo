@@ -28,13 +28,10 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract Git commit SHA
-        id: vars
-        run: echo "COMMIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
         
       - name: Set GIT_TAG
-        run: echo "GIT_TAG=${{ github.ref_name }}" >> $GITHUB_ENV
+        if: ${{ github.event_name == 'workflow_run' }}
+        run: echo "GIT_TAG=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_ENV
         
       - name: Install Docker Compose
         run: |
@@ -46,14 +43,14 @@ jobs:
         run: |
           docker-compose -f compose-prod.yaml build --build-arg GIT_TAG=${{ env.GIT_TAG }}
           for service in task-ms user-ms todo-frontend; do
-            docker tag ghcr.io/${{ github.actor }}/todo-app-$service:${{ env.GIT_TAG }} ghcr.io/${{ github.actor }}/todo-app-$service:${{ env.COMMIT_SHA }}
+            docker tag ghcr.io/${{ github.actor }}/todo-app-$service:${{ env.GIT_TAG }} ghcr.io/${{ github.actor }}/todo-app-$service:${{ github.sha }}
             docker tag ghcr.io/${{ github.actor }}/todo-app-$service:${{ env.GIT_TAG }} ghcr.io/${{ github.actor }}/todo-app-$service:latest
           done
           
       - name: Push Docker images
         run: |
           for service in task-ms user-ms todo-frontend; do
-            docker push ghcr.io/${{ github.actor }}/todo-app-$service:${{ env.COMMIT_SHA }}
+            docker push ghcr.io/${{ github.actor }}/todo-app-$service:${{ github.sha }}
             docker push ghcr.io/${{ github.actor }}/todo-app-$service:latest
             docker push ghcr.io/${{ github.actor }}/todo-app-$service:${{ env.GIT_TAG }}
           done
