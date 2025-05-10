@@ -4,15 +4,21 @@ services:
     build:
       context: .
       dockerfile: TaskMicroservice/Dockerfile
+      args:
+        GIT_TAG: ${GIT_TAG}
   
   user-ms:
     image: ghcr.io/juuwel/todo-app-user-ms:${GIT_TAG}
     build:
       context: .
       dockerfile: UserMicroservice/Dockerfile
-      
+      args:
+        GIT_TAG: ${GIT_TAG}
+  
   frontend:
     image: ghcr.io/juuwel/todo-app-todo-frontend:${GIT_TAG}
     build:
       context: ToDoFrontend
       dockerfile: Dockerfile
+      args:
+        GIT_TAG: ${GIT_TAG}
