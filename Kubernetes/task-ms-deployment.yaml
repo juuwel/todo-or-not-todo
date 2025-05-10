@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-microservice
+  namespace: todo-app
+  labels:
+    app: task-microservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: task-microservice
+  template:
+    metadata:
+      name: task-microservice
+      labels:
+        app: task-microservice
+    spec:
+      containers:
+        - name: task-microservice
+          image: ghcr.io/juuwel/todo-app-task-ms:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              value: "Host=task-db;Port=5432;Username=postgres;Password=postgres;Database=task_db"
+            - name: Jwt__Key
+              value: "e4c88641c473e0848a49431c9dafb5462efb3372dadd0403b3b60b8149cc9384"
+            - name: Jwt__Issuer
+              value: "https://to-do-or-not.todo"
+            - name: Jwt__Audience
+              value: "to-do-or-not.todo"
+            - name: Jwt__ExpirationMinutes
+              value: "1440"
+            - name: AllowedOrigins
+              value: "http://frontend:3000"
+      restartPolicy: Always

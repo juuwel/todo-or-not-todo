@@ -9,7 +9,7 @@
       - todo-app-network
 
   task-ms:
-    image: task-ms
+    image: ghcr.io/juuwel/todo-app-task-ms:latest
     build:
       context: .
       dockerfile: TaskMicroservice/Dockerfile
@@ -48,7 +48,7 @@
       - todo-app-network
 
   user-ms:
-    image: user-ms
+    image: ghcr.io/juuwel/todo-app-user-ms:latest
     build:
       context: .
       dockerfile: UserMicroservice/Dockerfile
@@ -123,7 +123,7 @@
       - todo-app-network
 
   frontend:
-    image: todo-frontend
+    image: ghcr.io/juuwel/todo-app-todo-frontend:latest
     build:
       context: ToDoFrontend
       dockerfile: Dockerfile

@@ -17,16 +17,8 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "UserMicroservice.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
-
-# Copy the wait-for-postgres.sh script to the final image
-USER root
-COPY wait-for-postgres.sh /app/wait-for-postgres.sh
-RUN apt-get update && apt-get install -y netcat-openbsd dos2unix
-RUN chmod +x /app/wait-for-postgres.sh && dos2unix wait-for-postgres.sh
-
 USER $APP_UID
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-ENTRYPOINT ["/app/wait-for-postgres.sh"]
 CMD ["dotnet", "UserMicroservice.dll"]

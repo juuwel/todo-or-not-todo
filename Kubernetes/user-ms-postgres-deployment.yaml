@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-db
+  namespace: todo-app
+  labels:
+    app: user-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-db
+  template:
+    metadata:
+      labels:
+        app: user-db
+    spec:
+      containers:
+        - name: user-db
+          image: postgres
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: user-db-storage
+          envFrom:
+            - configMapRef:
+                name: user-db-config
+      volumes:
+        - name: user-db-storage
+          persistentVolumeClaim:
+            claimName: user-db-volume-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-db
+  namespace: todo-app
+  labels:
+    app: user-db
+spec:
+  type: NodePort
+  ports:
+    - port: 5432
+  selector:
+    app: user-db
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: user-db-volume
+  labels:
+    type: local
+    app: user-db
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/task-ms/postgresql
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: user-db-volume-claim
+  namespace: todo-app
+  labels:
+    app: user-db
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
