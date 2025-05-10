@@ -14,6 +14,8 @@ jobs:
   create-tag:
     name: Create Tag
     runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.create_tag.outputs.tag_name }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,6 +26,7 @@ jobs:
         run: echo "date=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_OUTPUT
 
       - name: Create and push tag
+        id: create_tag
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
@@ -35,6 +38,9 @@ jobs:
   build-images:
     name: Build and Push Docker Images
     runs-on: ubuntu-latest
+    needs: create-tag
+    env:
+      tag_name: ${{ needs.create-tag.outputs.tag_name }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
