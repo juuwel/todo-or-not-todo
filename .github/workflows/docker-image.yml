@@ -33,7 +33,7 @@ jobs:
           tag_name="v${{ steps.date.outputs.date }}"
           git tag $tag_name
           git push origin $tag_name
-          echo "tag_name=$tag_name" >> $GITHUB_ENV
+          echo "tag_name=$tag_name" >> $GITHUB_OUTPUT
   
   build-images:
     name: Build and Push Docker Images
