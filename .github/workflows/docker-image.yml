@@ -30,7 +30,7 @@ jobs:
           tag_name="v${{ steps.date.outputs.date }}"
           git tag $tag_name
           git push origin $tag_name
-          echo "::set-output name=tag_name::$tag_name"
+          echo "tag_name=$tag_name" >> $GITHUB_ENV
   
   build-images:
     name: Build and Push Docker Images
@@ -54,7 +54,7 @@ jobs:
         
       - name: Build and tag images
         env:
-          GIT_TAG: ${{ needs.create-tag.outputs.tag_name }}
+          GIT_TAG: ${{ env.tag_name }}
         run: |
           docker-compose -f compose-prod.yaml build --build-arg GIT_TAG=${{ env.GIT_TAG }}
           for service in task-ms user-ms todo-frontend; do
@@ -63,6 +63,8 @@ jobs:
           done
           
       - name: Push Docker images
+        env:
+          GIT_TAG: ${{ env.tag_name }}
         run: |
           for service in task-ms user-ms todo-frontend; do
             docker push ghcr.io/${{ github.actor }}/todo-app-$service:${{ github.sha }}
