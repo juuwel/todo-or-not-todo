@@ -32,7 +32,13 @@ jobs:
       - name: Extract Git commit SHA
         id: vars
         run: echo "COMMIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
-
+        
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+        
       - name: Build and tag images
         run: |
           docker-compose -f compose-prod.yaml build --build-arg GIT_TAG=${{ github.ref_name }}
