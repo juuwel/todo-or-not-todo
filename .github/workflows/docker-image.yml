@@ -12,80 +12,39 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  build-images:
+    name: Build Docker Images
     runs-on: ubuntu-latest
-    
+    permissions:
+      packages: write
+      contents: read
     steps:
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      - name: Add remote server to known_hosts
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Git commit SHA
+        id: vars
+        run: echo "COMMIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
+
+      - name: Build and tag images
         run: |
-          ssh-keyscan ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+          docker-compose -f compose-prod.yaml build --build-arg GIT_TAG=${{ github.ref_name }}
+          for service in task-ms user-ms todo-frontend; do
+            docker tag ghcr.io/${{ github.repository }}/todo-app-$service:${{ github.ref_name }} ghcr.io/${{ github.repository }}/todo-app-$service:${{ env.COMMIT_SHA }}
+            docker tag ghcr.io/${{ github.repository }}/todo-app-$service:${{ github.ref_name }} ghcr.io/${{ github.repository }}/todo-app-$service:latest
+          done
           
-      - name: Deploy to server
+      - name: Push Docker images
         run: |
-          # Extract tag name that triggered the workflow
-          TAG_NAME=${{ github.ref_name }}
-          echo "🚀 Deploying tag: ${TAG_NAME}"
-      
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'ENDSSH'
-            echo "📥 Connected to server: $(hostname)"
-          
-            # Check if todo-or-not-todo directory exists, if not clone it
-            if [ ! -d ~/todo-or-not-todo ]; then
-              echo "📁 Directory not found. Cloning repository..."
-              git clone ${{ github.server_url }}/${{ github.repository }}.git ~/todo-or-not-todo
-              echo "✅ Repository cloned successfully"
-            else
-              echo "📂 Repository directory already exists"
-            fi
-      
-            # Navigate to project directory
-            cd ~/todo-or-not-todo
-            echo "📍 Working in directory: $(pwd)"
-      
-            # Pull latest code
-            echo "⬇️ Fetching latest code and tags..."
-            git fetch --all --tags
-            echo "✅ Fetch completed"
-          
-            # Checkout to the specific tag that triggered this workflow
-            echo "🔖 Checking out tag: ${{ github.ref_name }}"
-            git checkout tags/${{ github.ref_name }}
-            echo "✅ Checkout completed"
-          
-            # Set environment variables for compose.yaml
-            echo "🔐 Setting environment variables for docker-compose"
-            export UNLEASH_API_TOKEN="${{ secrets.UNLEASH_API_TOKEN }}"
-            export SERVER_HOST="${{ secrets.SERVER_HOST }}"
-            echo "✅ Environment variables set"
-          
-            # Create a .env file for docker-compose
-            echo "UNLEASH_API_TOKEN=${{ secrets.UNLEASH_API_TOKEN }}" > .env
-            echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> .env
-            echo "✅ Environment variables set and .env file created"
-          
-            # Create a temporary environment file with correct URLs for production build
-            echo "🔧 Creating Angular environment file for production..."
-            echo 'export const environment = {' > ToDoFrontend/src/environments/environment.production.ts
-            echo '  production: true,' >> ToDoFrontend/src/environments/environment.production.ts
-            echo "  taskMsBaseUrl: 'http://${{secrets.SERVER_HOST}}:1000/api/v1/tasks'," >> ToDoFrontend/src/environments/environment.production.ts
-            echo "  userMsBaseUrl: 'http://${{secrets.SERVER_HOST}}:1001'," >> ToDoFrontend/src/environments/environment.production.ts
-            echo '};' >> ToDoFrontend/src/environments/environment.production.ts
-            echo "✅ Environment file created with SERVER_HOST: ${{secrets.SERVER_HOST_TEST}}"          
-          
-            # Build the Docker images
-            echo "🐳 Building Docker images..."
-            docker compose build frontend task-ms user-ms
-            echo "✅ Docker images built successfully"
-          
-            # Start all services
-            echo "🐳 Starting Docker containers..."
-            docker stack deploy -c docker-swarm.yaml todo-or-not-todo
-            echo "✅ Containers started successfully"
-          ENDSSH
-          
-          echo "🎉 Deployment completed successfully!"
+          for service in task-ms user-ms todo-frontend; do
+            docker push ghcr.io/${{ github.repository }}/todo-app-$service:${{ github.sha }}
+            docker push ghcr.io/${{ github.repository }}/todo-app-$service:latest
+            docker push ghcr.io/${{ github.repository }}/todo-app-$service:${{ github.ref_name }}
+          done
