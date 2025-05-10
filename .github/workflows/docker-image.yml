@@ -60,10 +60,10 @@ jobs:
         env:
           GIT_TAG: ${{ needs.create-tag.outputs.tag_name }}
         run: |
-          docker-compose -f compose-prod.yaml build --build-arg GIT_TAG=${{ GIT_TAG }}
+          docker-compose -f compose-prod.yaml build --build-arg GIT_TAG=${GIT_TAG}
           for service in task-ms user-ms todo-frontend; do
-            docker tag ghcr.io/${{ github.actor }}/todo-app-$service:${{ GIT_TAG }} ghcr.io/${{ github.actor }}/todo-app-$service:${{ github.sha }}
-            docker tag ghcr.io/${{ github.actor }}/todo-app-$service:${{ GIT_TAG }} ghcr.io/${{ github.actor }}/todo-app-$service:latest
+            docker tag ghcr.io/${{ github.actor }}/todo-app-$service:${GIT_TAG} ghcr.io/${{ github.actor }}/todo-app-$service:${{ github.sha }}
+            docker tag ghcr.io/${{ github.actor }}/todo-app-$service:${GIT_TAG} ghcr.io/${{ github.actor }}/todo-app-$service:latest
           done
           
       - name: Push Docker images
@@ -73,5 +73,5 @@ jobs:
           for service in task-ms user-ms todo-frontend; do
             docker push ghcr.io/${{ github.actor }}/todo-app-$service:${{ github.sha }}
             docker push ghcr.io/${{ github.actor }}/todo-app-$service:latest
-            docker push ghcr.io/${{ github.actor }}/todo-app-$service:${{ GIT_TAG }}
+            docker push ghcr.io/${{ github.actor }}/todo-app-$service:${GIT_TAG}
           done
