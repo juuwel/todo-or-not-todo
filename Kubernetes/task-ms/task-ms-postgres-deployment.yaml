@@ -24,9 +24,29 @@ spec:
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
               name: task-db-storage
-          envFrom:
-            - configMapRef:
-                name: task-db-config
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: task-db-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: task-db-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: task-db-secret
+                  key: POSTGRES_DB
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
       volumes:
         - name: task-db-storage
           persistentVolumeClaim:
@@ -40,9 +60,9 @@ metadata:
   labels:
     app: task-db
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
-    - port: 5433
+    - port: 5432
   selector:
     app: task-db
 ---

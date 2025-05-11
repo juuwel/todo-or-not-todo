@@ -24,9 +24,29 @@ spec:
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
               name: user-db-storage
-          envFrom:
-            - configMapRef:
-                name: user-db-config
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: user-db-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: user-db-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: user-db-secret
+                  key: POSTGRES_DB
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
       volumes:
         - name: user-db-storage
           persistentVolumeClaim:
@@ -40,7 +60,7 @@ metadata:
   labels:
     app: user-db
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - port: 5432
   selector:

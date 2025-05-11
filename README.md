@@ -1,10 +1,9 @@
-To generate task-db-config:
+Secrets can be generated like:
 
 ```bash
-kubectl create configmap task-db-config --from-env-file=.env.task -n todo-app
-```
-
-To generate user-db-config:
-```bash
-kubectl create configmap user-db-config --from-env-file=.env.user -n todo-app
+kubectl create secret generic task-db-secret \
+  --namespace=todo-app \
+  --from-literal=POSTGRES_PASSWORD=<your-password> \
+  --from-literal=POSTGRES_USER=<your-username> \
+  --from-literal=POSTGRES_DB=<your-database>
 ```
