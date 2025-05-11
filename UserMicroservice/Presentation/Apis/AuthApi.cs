@@ -37,9 +37,9 @@ public static class AuthApi
         IUserService userService, IUnleash unleash,
         [FromBody] RegisterRequest request)
     {
-        if (unleash.IsEnabled("allow-register"))
+        // TODO: uncomment once we have Unleash running if (unleash.IsEnabled("allow-register"))
             return TypedResults.Ok(await userService.Register(request));
 
-        throw new NotImplementedException();
+        // throw new NotImplementedException();
     }
 }

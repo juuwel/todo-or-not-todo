@@ -21,7 +21,7 @@ public static class FeatureFlagApi
         IUnleash unleash,
         [FromRoute] string featureName)
     {
-        var isEnabled = unleash.IsEnabled(featureName);
-        return TypedResults.Ok(isEnabled);
+        // TODO: uncomment once we have Unleash running var isEnabled = unleash.IsEnabled(featureName);
+        return TypedResults.Ok(true);
     }
 }
