@@ -58,8 +58,8 @@ jobs:
 
       - name: Inject environment variables
         run: |
-          sed -i "s|__TASK_MS_BASE_URL__|${{ secrets.TASK_MS_BASE_URL }}|g" src/environments/environment.production.ts
-          sed -i "s|__USER_MS_BASE_URL__|${{ secrets.USER_MS_BASE_URL }}|g" src/environments/environment.production.ts
+          sed -i "s|__TASK_MS_BASE_URL__|${{ secrets.TASK_MS_BASE_URL }}|g" ToDoFrontend/src/environments/environment.production.ts
+          sed -i "s|__USER_MS_BASE_URL__|${{ secrets.USER_MS_BASE_URL }}|g" ToDoFrontend/src/environments/environment.production.ts
 
       - name: Build and tag images
         env:
