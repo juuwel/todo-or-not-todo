@@ -19,9 +19,9 @@ spec:
       containers:
         - name: user-microservice
           image: ghcr.io/juuwel/todo-app-user-ms:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
-            - containerPort: 80
+            - containerPort: 8080
               protocol: TCP
           env:
             - name: ConnectionStrings__DefaultConnection

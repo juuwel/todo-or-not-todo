@@ -1,5 +1,5 @@
 export const environment = {
     production: true,
-    taskMsBaseUrl: 'http://task-ms:1000/api/v1/tasks',
-    userMsBaseUrl: 'http://user-ms:1001',
+    taskMsBaseUrl: 'http://task-microservice:1000/api/v1/tasks',
+    userMsBaseUrl: 'http://user-microservice:1001',
 };

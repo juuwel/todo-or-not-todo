@@ -19,7 +19,7 @@ spec:
       containers:
         - name: frontend
           image: ghcr.io/juuwel/todo-app-todo-frontend:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
               protocol: TCP

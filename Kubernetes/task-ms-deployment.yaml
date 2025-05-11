@@ -19,7 +19,7 @@ spec:
       containers:
         - name: task-microservice
           image: ghcr.io/juuwel/todo-app-task-ms:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
               protocol: TCP
