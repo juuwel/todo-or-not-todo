@@ -80,7 +80,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /data/task-ms/postgresql
+    path: /data/user-ms/postgresql
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
