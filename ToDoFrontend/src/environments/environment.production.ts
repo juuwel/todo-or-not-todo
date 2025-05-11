@@ -1,5 +1,5 @@
 export const environment = {
     production: true,
-    taskMsBaseUrl: 'http://localhost:1000/api/v1/tasks',
-    userMsBaseUrl: 'http://localhost:1001',
+    taskMsBaseUrl: 'http://task-ms:1000/api/v1/tasks',
+    userMsBaseUrl: 'http://user-ms:1001',
 };
