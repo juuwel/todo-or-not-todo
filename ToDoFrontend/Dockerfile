@@ -3,6 +3,14 @@ FROM node:20.19.1-alpine as build
 
 WORKDIR /app
 
+# Pass backend URLs as build arguments
+ARG TASK_MS_BASE_URL
+ARG USER_MS_BASE_URL
+
+# Set environment variables in the Angular build
+ENV TASK_MS_BASE_URL=$TASK_MS_BASE_URL
+ENV USER_MS_BASE_URL=$USER_MS_BASE_URL
+
 # Copy only package.json and package-lock.json first to leverage Docker caching
 COPY package*.json ./
 

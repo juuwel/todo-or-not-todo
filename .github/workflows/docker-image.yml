@@ -34,7 +34,7 @@ jobs:
           git tag $tag_name
           git push origin $tag_name
           echo "tag_name=$tag_name" >> $GITHUB_OUTPUT
-  
+
   build-images:
     name: Build and Push Docker Images
     runs-on: ubuntu-latest
@@ -49,13 +49,18 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-        
+
       - name: Install Docker Compose
         run: |
           sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose --version
-        
+
+      - name: Inject environment variables
+        run: |
+          sed -i "s|__TASK_MS_BASE_URL__|${{ secrets.TASK_MS_BASE_URL }|g" src/environments/environment.production.ts
+          sed -i "s|__USER_MS_BASE_URL__|${{ secrets.USER_MS_BASE_URL }}|g" src/environments/environment.production.ts
+
       - name: Build and tag images
         env:
           GIT_TAG: ${{ needs.create-tag.outputs.tag_name }}
@@ -65,7 +70,7 @@ jobs:
             docker tag ghcr.io/${{ github.actor }}/todo-app-$service:${GIT_TAG} ghcr.io/${{ github.actor }}/todo-app-$service:${{ github.sha }}
             docker tag ghcr.io/${{ github.actor }}/todo-app-$service:${GIT_TAG} ghcr.io/${{ github.actor }}/todo-app-$service:latest
           done
-          
+
       - name: Push Docker images
         env:
           GIT_TAG: ${{ needs.create-tag.outputs.tag_name }}
