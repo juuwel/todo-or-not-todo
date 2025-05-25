@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: todo-app-ingress
+  namespace: todo-app
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  tls:
+    - hosts:
+        - todo.buchtik.top
+      secretName: todo-tls
+  rules:
+    - host: todo.buchtik.top
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: todo-frontend
+                port:
+                  name: web
+          - path: /api/v1/tasks
+            pathType: Prefix
+            backend:
+              service:
+                name: task-microservice
+                port:
+                  name: http
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: user-microservice
+                port:
+                  name: http
+          - path: /featureflag
+            pathType: Prefix
+            backend:
+              service:
+                name: user-microservice
+                port:
+                  name: http

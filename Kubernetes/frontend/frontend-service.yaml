@@ -1,14 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend
+  name: todo-frontend
   namespace: todo-app
 spec:
   selector:
-    app: frontend
+    app: todo-frontend
+  type: ClusterIP
   ports:
-    - protocol: TCP
-      port: 3000
+    - name: web
+      port: 80
       targetPort: 80
-  type: LoadBalancer
-  

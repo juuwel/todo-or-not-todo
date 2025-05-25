@@ -24,22 +24,9 @@ spec:
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
               name: task-db-storage
-          env:
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: task-db-secret
-                  key: POSTGRES_PASSWORD
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: task-db-secret
-                  key: POSTGRES_USER
-            - name: POSTGRES_DB
-              valueFrom:
-                secretKeyRef:
-                  name: task-db-secret
-                  key: POSTGRES_DB
+          envFrom:
+            - secretRef:
+                name: task-db-secret
           resources:
             requests:
               memory: "256Mi"
@@ -51,20 +38,6 @@ spec:
         - name: task-db-storage
           persistentVolumeClaim:
             claimName: task-db-volume-claim
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: task-db
-  namespace: todo-app
-  labels:
-    app: task-db
-spec:
-  type: ClusterIP
-  ports:
-    - port: 5432
-  selector:
-    app: task-db
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -81,18 +54,3 @@ spec:
     - ReadWriteOnce
   hostPath:
     path: /data/task-ms/postgresql
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: task-db-volume-claim
-  namespace: todo-app
-  labels:
-    app: task-db
-spec:
-  storageClassName: manual
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi

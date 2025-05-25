@@ -7,8 +7,7 @@ spec:
   selector:
     app: user-microservice
   ports:
-    - protocol: TCP
-      port: 1001
+    - name: http
+      port: 8080
       targetPort: 8080
-  type: LoadBalancer
-  
+  type: ClusterIP

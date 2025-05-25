@@ -1,27 +1,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: todo-frontend
   namespace: todo-app
   labels:
-    app: frontend
+    app: todo-frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend
+      app: todo-frontend
   template:
     metadata:
-      name: frontend
+      name: todo-frontend
       labels:
-        app: frontend
+        app: todo-frontend
     spec:
       containers:
-        - name: frontend
+        - name: todo-frontend
           image: ghcr.io/juuwel/todo-app-todo-frontend:latest
           imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
           ports:
             - containerPort: 80
               protocol: TCP
       restartPolicy: Always
-      

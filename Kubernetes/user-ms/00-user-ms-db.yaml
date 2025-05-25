@@ -24,22 +24,9 @@ spec:
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
               name: user-db-storage
-          env:
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: user-db-secret
-                  key: POSTGRES_PASSWORD
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: user-db-secret
-                  key: POSTGRES_USER
-            - name: POSTGRES_DB
-              valueFrom:
-                secretKeyRef:
-                  name: user-db-secret
-                  key: POSTGRES_DB
+          envFrom:
+            - secretRef:
+                name: user-db-secret
           resources:
             requests:
               memory: "256Mi"
@@ -51,20 +38,6 @@ spec:
         - name: user-db-storage
           persistentVolumeClaim:
             claimName: user-db-volume-claim
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: user-db
-  namespace: todo-app
-  labels:
-    app: user-db
-spec:
-  type: ClusterIP
-  ports:
-    - port: 5432
-  selector:
-    app: user-db
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -81,18 +54,3 @@ spec:
     - ReadWriteOnce
   hostPath:
     path: /data/user-ms/postgresql
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: user-db-volume-claim
-  namespace: todo-app
-  labels:
-    app: user-db
-spec:
-  storageClassName: manual
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi

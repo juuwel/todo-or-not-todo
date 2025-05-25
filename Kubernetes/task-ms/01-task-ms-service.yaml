@@ -7,8 +7,7 @@ spec:
   selector:
     app: task-microservice
   ports:
-    - protocol: TCP
-      port: 1000
+    - name: http
+      port: 8080
       targetPort: 8080
-  type: LoadBalancer
-  
+  type: ClusterIP
