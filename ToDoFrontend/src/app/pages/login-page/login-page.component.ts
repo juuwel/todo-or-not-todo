@@ -1,11 +1,11 @@
-import {Component} from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {AuthService} from '../../services/auth.service';
-import {AppMessageStore} from '../../stores/app-message.store';
-import {AppConstants} from '../../appConstants';
-import {firstValueFrom} from 'rxjs';
-import {AsyncPipe} from '@angular/common';
-import {AuthStore} from '../../stores/auth.store';
+import { AsyncPipe } from '@angular/common';
+import { Component } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
+import { AppConstants } from '../../appConstants';
+import { AuthService } from '../../services/auth.service';
+import { AppMessageStore } from '../../stores/app-message.store';
+import { AuthStore } from '../../stores/auth.store';
 
 @Component({
   selector: 'app-login-page',
@@ -27,8 +27,8 @@ export class LoginPageComponent {
     public authStore: AuthStore
   ) {
     this.loginForm = this.fb.group({
-      email: ['bob@app.com', [Validators.required, Validators.email]],
-      password: ['P@ssw0rd', Validators.required]
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', Validators.required]
     });
 
     this.authService.checkFeatureFlag(AppConstants.FeatureFlags.Register).subscribe(value => {

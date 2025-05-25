@@ -35,7 +35,7 @@ spec:
                 name: user-microservice
                 port:
                   name: http
-          - path: /featureflag
+          - path: /featureFlag
             pathType: Prefix
             backend:
               service:

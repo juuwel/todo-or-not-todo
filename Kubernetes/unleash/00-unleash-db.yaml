@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unleash-db
+  namespace: todo-app
+spec:
+  selector:
+    matchLabels:
+      app: unleash-db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: unleash-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:latest
+          envFrom:
+            - secretRef:
+                name: unleash-db-secret
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: unleash-db-storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: unleash-db-storage
+          persistentVolumeClaim:
+            claimName: unleash-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: unleash-db
+  namespace: todo-app
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+  selector:
+    app: unleash-db

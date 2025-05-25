@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unleash
+  namespace: todo-app
+  labels:
+    app: unleash
+spec:
+  selector:
+    matchLabels:
+      app: unleash
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: unleash
+    spec:
+      containers:
+        - name: unleash
+          image: unleashorg/unleash-server
+          envFrom:
+            - secretRef:
+                name: unleash-secret
+          env:
+            - name: DATABASE_HOST
+              value: unleash-db
+            - name: DATABASE_SSL
+              value: "false"
+          ports:
+            - containerPort: 4242

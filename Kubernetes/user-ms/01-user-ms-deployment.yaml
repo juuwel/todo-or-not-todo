@@ -51,6 +51,13 @@ spec:
                   key: POSTGRES_DB
             - name: ConnectionStrings__DefaultConnection
               value: "Host=user-db;Port=5432;Username=$(POSTGRES_USER);Password=$(POSTGRES_PASSWORD);Database=$(POSTGRES_DB)"
+            - name: Unleash__ApiUrl
+              value: "http://unleash:4242/api/"
+            - name: Unleash__ApiToken
+              valueFrom:
+                secretKeyRef:
+                  name: unleash-api-token-secret
+                  key: UNLEASH_API_TOKEN
           envFrom:
             - secretRef:
                 name: user-db-secret
